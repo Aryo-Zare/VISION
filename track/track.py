@@ -1,6 +1,6 @@
 
 
-# %%
+# %%'
 
 point = pd.read_csv( r'U:\VISION\track\results-7\center_points.csv' )
 
@@ -15,13 +15,27 @@ point[:4]
     # 2  323  159
     # 3  322  159
 
-# %%
+# %%'
+
+point['x'].min()
+    # Out[19]: 315
+
+# %% Trajectory
+
+fig , ax = plt.subplots( figsize =(12,12) )
 
 plt.plot( point.iloc[:,0] , point.iloc[:,1] )
-plt.title('coordinates _ movement')
-plt.savefig( r'U:\VISION\track\results-7\1\coordinate.pdf' )
+plt.title('Trajectory')
 
-# %%
+fig.tight_layout()
+
+# %%'
+
+plt.savefig( r'U:\VISION\track\results-7\1\Trajectory.pdf' )
+
+# 250 - 800 : the span of x & y coordinates, according to the figure.
+
+# %%'
 
 dva = pd.read_csv( r'U:\VISION\track\results-7\distance_velocity_acceleration.csv' )
 
@@ -60,8 +74,8 @@ dva.iloc[28:32,0]
     # 31    1.033333
     # Name: time_s, dtype: float64
 
-# %%
-# %%
+# %%'
+# %%'
 
 
 # Assume df is your DataFrame with 'time', 'x', and 'y' columns
@@ -79,7 +93,7 @@ downsample_factor = 10
         # because only the remaining indices are shown. 
 point_downsampled = point.iloc[::downsample_factor].reset_index(drop=True)
 
-# %%
+# %%'
 
 point_downsampled.shape
     # Out[10]: (45, 4)
@@ -92,7 +106,7 @@ point_downsampled[:4]
     # 2  327  162     327.6     165.0
     # 3  333  167     333.4     168.4
 
-# %%
+# %%'
 
 # Step 3: Calculate differences for velocity estimation on downsampled data
 df_downsampled['dt'] = df_downsampled['time'].diff()
@@ -103,7 +117,7 @@ point_downsampled['dy'] = point_downsampled['y_smooth'].diff()
 # Distance and velocity calculation
 point_downsampled['distance'] = np.sqrt( point_downsampled['dx']**2 + point_downsampled['dy']**2 )
 
-# %%
+# %%'
 
 point_downsampled['distance'][:5]
     # Out[16]: 
@@ -114,19 +128,55 @@ point_downsampled['distance'][:5]
     # 4    4.841487
     # Name: distance, dtype: float64
 
-# %%
+# %% speed
+
+# I did not divide by time, as time is a fixed number & the units here are arbitrary.
+
+fig , ax = plt.subplots( figsize =(15,12) )
 
 plt.plot( point_downsampled['distance'] )
+plt.title('velocity of movement \n moving average with a window of 5 \n downsampled by factor 10 \n arbitrary units')
 
-# %%
+plt.xlabel('time' , loc='right')
+plt.ylabel('velocity' , loc='top')
 
+fig.tight_layout()
+
+# %%%'
+
+plt.savefig( r'U:\VISION\track\results-7\1\velocity_3.pdf' )
+
+# %%'
+
+# not performed
 df_downsampled['velocity'] = df_downsampled['distance'] / df_downsampled['dt']
 df_downsampled['velocity'] = df_downsampled['velocity'].fillna(0)
 
-# %%
+# %% acceleration 
 
+# again, as the denominator ( dt ) is equal among all rows, I discarded this.
+point_downsampled['acc'] = point_downsampled['distance'].diff()
 
+# %%%'
 
+# force : this is an indicatoin of the stamina of the animal.
+
+fig , ax = plt.subplots( figsize =(15,12) )
+
+plt.plot( point_downsampled['acc'] )
+
+plt.title('Acceleration ( arbitrary units )')
+
+plt.xlabel('time' , loc='right')
+plt.ylabel('acceleration' , loc='top')
+
+fig.tight_layout()
+
+# %%'
+
+plt.savefig( r'U:\VISION\track\results-7\1\acceleration.pdf' )
+
+# %%'
 
 
 
