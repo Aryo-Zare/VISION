@@ -1,8 +1,15 @@
 
 
-# %%.
+# %%'
 
-point = pd.read_csv( r'U:\VISION\track\results-7\center_points.csv' )
+
+point_1 = pd.read_csv( r'U:\VISION\track\data\P067_ZC60_OF2ReTr_Video_1_04_06_2023_11_35_42_1\center_points.csv' )
+
+point_2 = pd.read_csv( r'U:\VISION\track\data\P067_ZC61_OF2ReTr_Video_1_28_06_2023_11_01_15_1\center_points.csv' )
+
+# %%'
+
+# U:\VISION\track\results-7\center_points.csv
 
 point_downsampled.to_csv( r'U:\VISION\track\results-7\point_downsampled.csv'  )
 
@@ -11,6 +18,7 @@ point_downsampled = pd.read_csv( r'U:\VISION\track\results-7\point_downsampled.c
 # %%'
 
 point.shape
+    # Out[8]: (17992, 2)   # 10 minute video
     # Out[7]: (449, 2)
 
 point[:4]
@@ -42,19 +50,30 @@ point['x'].min()
 point['xm'] = point['x'] * 0.0025
 point['ym'] = point['y'] * 0.0025
 
+# %%'
+
+point_1['xm'] = point_1['x'] * 0.0025
+point_1['ym'] = point_1['y'] * 0.0025
+
+# %%'
+
+point_2['xm'] = point_2['x'] * 0.0025
+point_2['ym'] = point_2['y'] * 0.0025
+
 # %% Trajectory
+# single plot
 
 # Trajectory
 # if loading 'point_downsampled' from the beginning, you should not use it instead of 'point' here.
     # reason : it's downsampled & will result a low-resolution trajectory !
         # we do not need downsampling for trajectory plotting !
 
-fig , ax = plt.subplots( figsize =(10,12) )
+fig , ax = plt.subplots( figsize =(13,10) )
 
 
 # the y coordinates of video-images are rendered from top to bottom.
 # hence, here, the y coordinates are mirrored (-) to conform to the video !!
-plt.plot( point['xm'] , -point['ym'] , linewidth=16 )
+plt.plot( point['xm'] , -point['ym'] , linewidth=8 )   # , linewidth=16 
 
 # plt.plot( point.iloc[:,0] , point.iloc[:,1] )
 
@@ -62,21 +81,71 @@ plt.plot( point['xm'] , -point['ym'] , linewidth=16 )
 # hence, here, the y coordinates are mirrored (-) to conform to the video !!
 # plt.plot( point.iloc[:,0] , -point.iloc[:,1] )
 
-plt.title('Movement trajectory of a pig in a 15s test video')
+plt.title('Movement trajectory of a pig in a 10 minute video \n' +
+          ' retraining_2 : P067_ZC60_OF2ReTr_Video_1_04_06_2023_11_35_42_1.mp4 ' , 
+          fontsize=20)
 
 plt.xlabel( 'door side (m)'  , loc='right' )
 plt.ylabel( 'barrier side (m)' , loc='top' )
 
 fig.tight_layout()
 
+# %%'
+# %% double
+
+fig , ax = plt.subplots( 2,1 , figsize=(16,12) , sharex=True )
+
+# %%'
+
+
+# the y coordinates of video-images are rendered from top to bottom.
+# hence, here, the y coordinates are mirrored (-) to conform to the video !!
+ax[0].plot( point_1['xm'] , -point_1['ym'] , linewidth=8 )   # , linewidth=16 
+
+# plt.plot( point.iloc[:,0] , point.iloc[:,1] )
+
+# the y coordinates of video-images are rendered from top to bottom.
+# hence, here, the y coordinates are mirrored (-) to conform to the video !!
+# plt.plot( point.iloc[:,0] , -point.iloc[:,1] )
+
+ax[0].set_title('P067_ZC60_OF2ReTr_Video_1_04_06_2023_11_35_42_1.mp4 ' , 
+          fontsize=20)
+
+ax[0].set_xlabel( 'door side (m)'  , loc='right' )
+ax[0].set_ylabel( 'barrier side (m)' , loc='top' )
+
+# %%'
+
+ax[1].plot( point_2['xm'] , -point_2['ym'] , linewidth=8 )   # , linewidth=16 
+
+# plt.plot( point.iloc[:,0] , point.iloc[:,1] )
+
+# the y coordinates of video-images are rendered from top to bottom.
+# hence, here, the y coordinates are mirrored (-) to conform to the video !!
+# plt.plot( point.iloc[:,0] , -point.iloc[:,1] )
+
+ax[1].set_title( 'P067_ZC61_OF2ReTr_Video_1_28_06_2023_11_01_15_1.mp4 ' , 
+          fontsize=20)
+
+ax[1].set_xlabel( 'door side (m)'  , loc='right' )
+ax[1].set_ylabel( 'barrier side (m)' , loc='top' )
+
+
+# %%'
+
+fig.suptitle( 'Movement trajectories in 10 minute videos \n retraining_2 ' )
+
+fig.tight_layout()
+
 # %%%'
 
-plt.savefig( r'U:\VISION\track\results-7\2\trajectory_2.pdf' )
-plt.savefig( r'U:\VISION\track\results-7\2\trajectory_3.svg' )
+plt.savefig( r'U:\VISION\track\test\trajectory_2.pdf' )
+# plt.savefig( r'U:\VISION\track\results-7\2\trajectory_3.svg' )
 
 
 # 250 - 800 : the span of x & y coordinates, according to the figure.
 
+# %%'
 # %% Emil's analysis. 
 
 # Emil's analysis.
@@ -151,7 +220,7 @@ point_downsampled[:4]
     # 2  327  162     327.6     165.0
     # 3  333  167     333.4     168.4
 
-# %%'
+# %%' distance
 
 # Step 3: Calculate differences for velocity estimation on downsampled data
 
@@ -165,6 +234,9 @@ point_downsampled['distance'] = np.sqrt( point_downsampled['dx']**2 + point_down
 point_downsampled['distance_m'] = point_downsampled['distance'] * 0.025
 
 
+
+# 15s video
+# 45 frames
 time_range = np.linspace( 0 , 15 , num=45 )
 time_range.shape
     # Out[30]: (45,)
@@ -292,13 +364,13 @@ ax[1].set_ylabel( r'Acceleration $(\mathrm{m/s^2})$'  , loc='top')
 #Italicized
 # plt.ylabel( r'Acceleration $(m/s^2)$'  , loc='top')    
 
-# %%
+# %%'
 
 # fig.suptitle( 'Velocity & acceleration of movement' , fontsize=24 )
 
 fig.tight_layout()
 
-# %%
+# %%'
 
 # velocity & acceleration
 plt.savefig( r'U:\VISION\track\results-7\2\va.pdf' )
