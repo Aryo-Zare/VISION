@@ -10,16 +10,20 @@ import io # Still import io, though not directly used for TextIOWrapper in this 
 # %%
 
 # Define your source and destination directories
-source_dir = r"U:\home_cage\backup\test_transfer"
+source_dir = r"U:\VISION\backup\test_transfer"
 destination_dir = r"L:\P087\test"
+
+# %%
 
 # Get current date for log file
 log_date = datetime.datetime.now().strftime("%Y-%m-%d")
-log_file_path = fr"U:\home_cage\backup\log_backup_{log_date}.txt"
+log_file_path = fr"U:\VISION\backup\log_backup_{log_date}.txt"
 
 # Ensure the log directory exists
 log_dir = os.path.dirname(log_file_path)
 os.makedirs(log_dir, exist_ok=True)
+
+# %%
 
 # Robocopy command and arguments
 robocopy_command = [
