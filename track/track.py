@@ -259,7 +259,7 @@ point_downsampled['distance'][:5]
     # 4    4.841487
     # Name: distance, dtype: float64
 
-# %% velocity _ pixel
+# %% plot _ velocity _ pixel
 
 # I did not divide by time, as time is a fixed number & the units here are arbitrary.
 
@@ -277,7 +277,7 @@ fig.tight_layout()
 
 plt.savefig( r'U:\VISION\track\results-7\1\velocity_3.pdf' )
 
-# %%'
+# %% velocity in m/s
 
 # velocity in m/s
 # the data is downsampled : each 'distance' datapoint corresponds to the distance traveled in 10 frames ( 1/3 s )
@@ -290,7 +290,7 @@ point_downsampled['velocity_ms'] = point_downsampled['distance_m'] / ( 1/3 )
 # df_downsampled['velocity'] = df_downsampled['distance'] / df_downsampled['dt']
 # df_downsampled['velocity'] = df_downsampled['velocity'].fillna(0)
 
-# %% velocity _ m/s
+# %% plot _ velocity _ m/s
 
 # velocity _ m/s
 
@@ -314,6 +314,7 @@ plt.savefig( r'U:\VISION\track\results-7\2\velocity_ms.pdf' )
 point_downsampled['acc'] = point_downsampled['distance'].diff()
 
 # acceleration in m/s^2
+# 1/3 s : refer to the explanation in one of the above cells.
 point_downsampled['acc_ms2'] = point_downsampled['velocity_ms'].diff() / ( 1/3 )
 
 # %%%'

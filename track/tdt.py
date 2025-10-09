@@ -1,9 +1,6 @@
 
 # tdt : total distance traveled.
 
-# %%
-
-
 
 # %%' 
 
@@ -47,6 +44,9 @@ def process_df_track (
 # %%%' x&y differences
 
     # Step 3: Calculate x&y differences on downsampled data
+    # diff : the difference of :
+        # each x[i] & x[i+1]
+        # each y[i] & y[i+1]
     
     df_2['dx'] = df_2['x_smooth'].diff()
     df_2['dy'] = df_2['y_smooth'].diff()
@@ -82,6 +82,7 @@ df_ZC = [ df_ZC61 , df_ZC62 , df_ZC63 , df_ZC64 ]
 
 # pixel-meter conversion ( length ).
 # for each video, there is a slight difference !
+# 14 tiles = 175 cm
 # ZC60
 m_pix_ZC60 = 1.75 / 558
 m_pix_ZC61 = 1.75 / 555
