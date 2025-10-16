@@ -9,7 +9,7 @@
 
 import os
 
-# %%' rename
+# %% rename
 
 # replace spaces as they will be interpreted as a separate argument when running Emil's script directly from terminal.
 
@@ -76,7 +76,7 @@ rename_files(directory)
 # Renamed: "ZC22_20201018 Video 1 10_18_2020 11_41_07 AM 1.mp4" to "ZC22_20201018_Video_1_10_18_2020_11_41_07_AM_1.mp4"
 
 # %%'
-# %%' un-warp
+# %% un-warp
 
 # un-warp commands
     # || the fish-eye distortion
@@ -100,7 +100,7 @@ for filename in os.listdir(input_dir):
         print(command)
 
 
-# %%'  retrain_2 commands _ unwarp
+# %% retrain_2 commands _ unwarp
 
 # python undistort.py D:\video\retraining_2\P067_ZC61_OF2ReTr_Video_1_28_06_2023_11_01_15_1.mp4 D:\video\retraining_2\uw\P067_ZC61_OF2ReTr_Video_1_28_06_2023_11_01_15_1_uw.mp4 --balance 0.3
 # python undistort.py D:\video\retraining_2\P067_ZC62_OF2ReTr_Video_1_04_07_2023_10_52_25_1.mp4 D:\video\retraining_2\uw\P067_ZC62_OF2ReTr_Video_1_04_07_2023_10_52_25_1_uw.mp4 --balance 0.3
@@ -532,7 +532,7 @@ extract_first_frame_in_directory( r'U:\data\track_data' )
 
 
 # %%'
-# %%' first frame from only one video
+# %% first frame from only one video
 
 # if you want to extract the first frame from only one video !
 
@@ -952,8 +952,273 @@ df.iloc[-4: , :2]
 
 df.iloc[:4 , 2 ]
 
+# %% ROI ( region of interest )
+
+# manually select the ROI ( the open-filed area ) out of the whole camera zone ( tiles, walls , ... ).
+# export the pixel dimensions of its 4 corners.
+# automatically define the pixel dimensons of the inner zone ( the smaller rectangel in the middle of the open-field ).
+    # this is potentially where the pig is anxious to step in !
+    # outer-zone = open-field - inner-zone 
+
+# Gemini / track
+    # F:\OneDrive - Uniklinik RWTH Aachen\VISION\track / AI__track .docx  /  37 : ROI
+
+# Import necessary libraries
+import cv2          # For image processing and the ROI selection tool
+import numpy as np    # For numerical operations
+import json         # For saving the final data
+from pathlib import Path  # For modern path handling
+import os           # To walk through the directory structure
+
+# %%'
+
+# --- Configuration ---
+# ❗ IMPORTANT: Set this to the top-level folder containing all your subfolders with images.
+FRAMES_FOLDER = Path(r"F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\first_frame_3")
+OUTPUT_ROI_FILE = FRAMES_FOLDER / "roi_definitions.json"
+CENTER_SCALE_FACTOR = 0.5  # Inner rectangle will be 50% of the outer's width and height
+
+# --- Main Script Logic ---
+# This dictionary will store all the final ROI data, with the unique video_id as the key.
+roi_data = {}
+
+# os.walk is the perfect tool for traversing a nested directory structure.
+# For each folder it finds, it gives us its path (root), a list of subfolders (dirs), and a list of files.
+for root , _ , files in os.walk(FRAMES_FOLDER):
+    # --- 1. Find a Representative Image for the Current Folder ---
+    
+    # Create a list of all valid image files in the current folder.
+    valid_files = []
+    for f in files:
+        # A file is valid if its name does NOT contain 'sample' AND it's a known image type.
+        if 'sample' not in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg')):
+            valid_files.append(f)
+
+    # If there are no valid images in this folder, skip to the next one.
+    if not valid_files:
+        continue
+
+    print(f"\n--- Processing Folder: {root} ---")
+    print(f"Found {len(valid_files)} valid images. Using '{valid_files[0]}' as the representative.")
+
+    # We only need to process one image to define the ROI for this entire folder.
+    # We'll pick the first valid one we found.
+    representative_image_path = os.path.join(root, valid_files[0])
+    frame = cv2.imread(representative_image_path)
+    
+    # --- 2. Interactively Define the Outer Rectangle ---
+    
+    # cv2.selectROI provides a built-in tool for this.
+    # It opens a window and lets you click and drag to draw a rectangle.
+    # Press ENTER or SPACE to confirm the selection. Press 'c' to cancel.
+    # It returns the bounding box as a tuple: (x, y, width, height)
+    print("INSTRUCTIONS: Draw a box around the open field. Press ENTER to confirm or 'c' to cancel.")
+    bbox = cv2.selectROI("Define Open-Field (Press ENTER to Confirm)", frame, showCrosshair=False)
+    cv2.destroyAllWindows() # Close the ROI window after selection.
+
+    # Check if the user drew a valid box (width and height must be > 0).
+    if bbox[2] == 0 or bbox[3] == 0:
+        print("   -> No valid ROI selected for this folder. Skipping.")
+        continue
+
+    # --- 3. Calculate Outer and Inner ROI Coordinates ---
+
+    # Extract the values from the bounding box tuple.
+    x, y, w, h = bbox
+    
+    # Define the four corners of the outer rectangle.
+    # This format is a list of points, which is what our Phase 2 script expects.
+    # these corresponds to these corners of a square: lower-left , lower-right , upper-right , upper-left.
+    outer_roi_points = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]
+
+    # Calculate the dimensions and position of the inner rectangle.
+    inner_w = w * CENTER_SCALE_FACTOR
+    inner_h = h * CENTER_SCALE_FACTOR
+    # The starting point is offset to keep the inner box centered.
+    inner_x = x + (w - inner_w) / 2
+    inner_y = y + (h - inner_h) / 2
+
+    # Define the four corners of the inner rectangle.
+    inner_roi_points = [
+        [int(inner_x), int(inner_y)],
+        [int(inner_x + inner_w), int(inner_y)],
+        [int(inner_x + inner_w), int(inner_y + inner_h)],
+        [int(inner_x), int(inner_y + inner_h)]
+    ]
+
+    print(f"   -> ROI defined for this folder. Applying to all {len(valid_files)} images.")
+
+    # --- 4. Apply the Same ROI to All Valid Files in This Folder ---
+    
+    # Now, loop through every valid filename in the current folder.
+    for filename in valid_files:
+        # Get the filename without the extension (e.g., 'pod_3_ZC15') to use as the unique ID.
+        video_id = Path(filename).stem
+        
+        # Save the SAME calculated ROI coordinates for this video_id.
+        roi_data[video_id] = {
+            "outer_roi": outer_roi_points,
+            "inner_roi": inner_roi_points
+        }
+
+# --- 5. Save All Definitions to the Final JSON File ---
+with open(OUTPUT_ROI_FILE, 'w') as f:
+    json.dump(roi_data, f, indent=4)
+
+print(f"\n✅ All ROI definitions have been saved to '{OUTPUT_ROI_FILE}'")
+
 # %%'
 
 
+'''
+
+    --- Processing Folder: F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\first_frame_3\pod_7\SAME_4 ---
+    Found 6 valid images. Using 'pod_7_ZC05.png' as the representative.
+    INSTRUCTIONS: Draw a box around the open field. Press ENTER to confirm or 'c' to cancel.
+       -> No valid ROI selected for this folder. Skipping.
+    
+    ...
+    
+    --- Processing Folder: F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\first_frame_3\zc-14 ---
+    Found 5 valid images. Using 'pod_1_ZC14.png' as the representative.
+    INSTRUCTIONS: Draw a box around the open field. Press ENTER to confirm or 'c' to cancel.
+       -> ROI defined for this folder. Applying to all 5 images.
+    
+    ✅ All ROI definitions have been saved to 'roi_definitions.json'
+
+'''
+
+
+# explore
+valid_files
+    # Out[7]: 
+    # ['pod_1_ZC14.png',
+    #  'pod_3_ZC14.png',
+    #  'pod_4_ZC14.png',
+    #  'pod_7_ZC14.png',
+    #  'retrain_2_ZC14.png']
+
 # %%'
+
+# dictionary
+# this was also saved as a json file.
+roi_data
+    # ...
+    #  'pod_7_ZC09': {'outer_roi': [[172, 74],
+    #    [1119, 74],
+    #    [1119, 1024],
+    #    [172, 1024]],
+    #   'inner_roi': [[408, 311], [882, 311], [882, 786], [408, 786]]},
+    #  'pod_7_ZC10': {'outer_roi': [[172, 74],
+    #    [1119, 74],
+    #    [1119, 1024],
+    #    [172, 1024]],
+    #   'inner_roi': [[408, 311], [882, 311], [882, 786], [408, 786]]},
+    #  'pod_7_ZC11': {'outer_roi': [[172, 74],
+    #    [1119, 74],
+    #    [1119, 1024],
+    #    [172, 1024]],
+    #   'inner_roi': [[408, 311], [882, 311], [882, 786], [408, 786]]}}
+
+# %% attempt
+
+# not as intended ! : see the nxt cell.
+
+        df_roi_data = pd.DataFrame( data=roi_data )
+        
+        df_roi_data.shape
+            # Out[16]: (2, 111)
+        
+        df_roi_data[:4]
+            # Out[15]: 
+            #                                                  pod_1_ZC60  ...                                         pod_7_ZC11
+            # outer_roi  [[264, 32], [1147, 32], [1147, 902], [264, 902]]  ...  [[172, 74], [1119, 74], [1119, 1024], [172, 10...
+            # inner_roi  [[484, 249], [926, 249], [926, 684], [484, 684]]  ...   [[408, 311], [882, 311], [882, 786], [408, 786]]
+            
+            # [2 rows x 111 columns]
+
+# .to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\cp_av.pkl' )
+
+
+# %% dataframe
+
+# converting the dictionary to a dataframe
+
+# Use .from_dict with orient='index' to treat dictionary keys as rows
+df_roi_data = pd.DataFrame.from_dict(roi_data, orient='index')
+
+df_roi_data[:4]
+    # Out[18]: 
+    #                                                    outer_roi                                         inner_roi
+    # pod_1_ZC60  [[264, 32], [1147, 32], [1147, 902], [264, 902]]  [[484, 249], [926, 249], [926, 684], [484, 684]]
+    # pod_1_ZC61  [[264, 32], [1147, 32], [1147, 902], [264, 902]]  [[484, 249], [926, 249], [926, 684], [484, 684]]
+    # pod_1_ZC62  [[264, 32], [1147, 32], [1147, 902], [264, 902]]  [[484, 249], [926, 249], [926, 684], [484, 684]]
+    # pod_1_ZC63  [[264, 32], [1147, 32], [1147, 902], [264, 902]]  [[484, 249], [926, 249], [926, 684], [484, 684]]
+
+
+# .reset_index() converts the index into a column named 'index' by default
+df_roi_data = df_roi_data.reset_index()
+
+# Rename the new 'index' column to something more descriptive
+df_roi_data.rename(columns={'index': 'video_id'}, inplace=True)
+
+df_roi_data.shape
+    # Out[22]: (111, 3)
+
+df_roi_data[:4]
+    # Out[21]: 
+    #      video_id  ...                                         inner_roi
+    # 0  pod_1_ZC60  ...  [[484, 249], [926, 249], [926, 684], [484, 684]]
+    # 1  pod_1_ZC61  ...  [[484, 249], [926, 249], [926, 684], [484, 684]]
+    # 2  pod_1_ZC62  ...  [[484, 249], [926, 249], [926, 684], [484, 684]]
+    # 3  pod_1_ZC63  ...  [[484, 249], [926, 249], [926, 684], [484, 684]]
+    
+    # [4 rows x 3 columns]
+                      
+# %%
+
+# explanation in : C:\code\VISION\track\all_track.py
+df_roi_data[['time', 'sample_ID']] = df_roi_data['video_id'].str.rsplit( pat='_', n=1, expand=True)
+
+df_roi_data[:4]
+    # Out[26]: 
+    #      video_id  ... sample_ID
+    # 0  pod_1_ZC60  ...      ZC60
+    # 1  pod_1_ZC61  ...      ZC61
+    # 2  pod_1_ZC62  ...      ZC62
+    # 3  pod_1_ZC63  ...      ZC63
+    
+    # [4 rows x 5 columns]
+
+df_roi_data.columns
+    # Out[27]: Index(['video_id', 'outer_roi', 'inner_roi', 'time', 'sample_ID'], dtype='object')
+
+df_roi_data[[ 'time', 'sample_ID' , 'video_id' ]][:4]
+    # Out[9]: 
+    #     time sample_ID    video_id
+    # 0  pod_1      ZC60  pod_1_ZC60
+    # 1  pod_1      ZC61  pod_1_ZC61
+    # 2  pod_1      ZC62  pod_1_ZC62
+    # 3  pod_1      ZC63  pod_1_ZC63
+
+df_roi_data[[ 'outer_roi', 'inner_roi' ]][:4]
+    # Out[10]: 
+    #                                           outer_roi  \
+    # 0  [[264, 32], [1147, 32], [1147, 902], [264, 902]]   
+    # 1  [[264, 32], [1147, 32], [1147, 902], [264, 902]]   
+    # 2  [[264, 32], [1147, 32], [1147, 902], [264, 902]]   
+    # 3  [[264, 32], [1147, 32], [1147, 902], [264, 902]]   
+    
+    #                                           inner_roi  
+    # 0  [[484, 249], [926, 249], [926, 684], [484, 684]]  
+    # 1  [[484, 249], [926, 249], [926, 684], [484, 684]]  
+    # 2  [[484, 249], [926, 249], [926, 684], [484, 684]]  
+    # 3  [[484, 249], [926, 249], [926, 684], [484, 684]]  
+
+# %%
+
+df_roi_data.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_roi_data.pkl' )
+
+# %%
+
 

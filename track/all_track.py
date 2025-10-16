@@ -3,20 +3,20 @@
 # oop !
 # F:\OneDrive - Uniklinik RWTH Aachen\VISION\track \ AI_track .docx
 
-# %%
+# %%'
 
 from pathlib import Path
 
+# %%''
+
+
 # %%'
-
-
-# %%
 
 # continued from : system.py / height (pixel)
 image_height_analysis_opencv = pd.read_csv ( 
             r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\first_frame_3\image_height_analysis_opencv.csv' )
 
-# %%'
+# %%''
 
 image_height_analysis_opencv[:4]
     # Out[9]: 
@@ -36,7 +36,7 @@ image_height_analysis_opencv.shape
     # Out[10]: (111, 3)
 
 
-# %%
+# %%'
 
 # --- 1. Specify the path to your folder containing the CSV files ---
 # Replace '.' with the actual path if your script is not in the same parent directory.
@@ -57,7 +57,7 @@ csv_files = list(data_folder.glob('*.csv'))
 print(f"Found {len(csv_files)} CSV files to process.")
 # Found 111 CSV files to process.
 
-# %%
+# %%'
 
 all_data_list = []
 
@@ -95,7 +95,7 @@ if all_data_list:
 else:
     print("No CSV files were processed. The list is empty.")
 
-# %%
+# %%'
 
 # The output from the above cell.
 '''
@@ -131,7 +131,7 @@ else:
 
 '''
 
-# %%
+# %%'
 
 master_df.shape
     # Out[22]: (1962732, 3)
@@ -172,19 +172,19 @@ print(master_df.tail())
     # 1962730  retrain_2_ZC68  retrain_2      ZC68  1056  913
     # 1962731  retrain_2_ZC68  retrain_2      ZC68  1056  913
 
-# %%
+# %%'
 
 # cp_av = center-points _ all videos.
 master_df.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\cp_av.pkl' )
 
-# %%
+# %%'
 
 # cp_av : center oints , all videos
 cp_av = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\cp_av.pkl' )
 
 
-# %%'
-# %%'
+# %%''
+# %%''
 # %% groupby
 
 # here, on a big dataframe with multiple categories inside, instead of performing a 'for loop', the : groupby : function is used.
@@ -193,11 +193,11 @@ cp_av = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\
 # You should adjust these values based on your experimental setup and noise level.
 window_size = 5          # How many frames to average over. Adjust as needed. 
 downsample_factor = 10    # Set to 1 to disable downsampling, or >1 to use it.
-m_pix = 0.01             # Example meter-to-pixel conversion factor.
+# m_pix = 0.01             # Example meter-to-pixel conversion factor.
     # was not used !
 fps = 30                 # Frames per second of the video source. 
 
-# %%
+# %%'
 
 # 1. Define a clear, reusable function
 def smooth_rolling_mean(series, window):
@@ -213,7 +213,7 @@ print("Applying smoothing filter to x and y coordinates...")
 cp_av['x_smooth'] = cp_av.groupby('video_id')['x'].transform( smooth_rolling_mean, window=window_size )
 cp_av['y_smooth'] = cp_av.groupby('video_id')['y'].transform( smooth_rolling_mean, window=window_size )
 
-# %%
+# %%'
 
 cp_av.shape
     # Out[14]: (1962732, 7)
@@ -226,7 +226,7 @@ cp_av[:4]
     # 2  pod_1_ZC04  pod_1      ZC04  774  415 775.000000 414.800000
     # 3  pod_1_ZC04  pod_1      ZC04  782  412 781.200000 412.000000
 
-# %%
+# %%'
 
 # --- 3. Downsample the data FOR EACH VIDEO (Optional) ---
 # Applying a function to each group is the safest way to downsample.
@@ -250,7 +250,7 @@ cp_av_ds = cp_av.groupby('video_id').apply(
     # => the 'video_id' column would be excluded from the output dataframe.
 
 
-# %%
+# %%'
 
 cp_av_ds.shape
     # Out[21]: (196341, 7)
@@ -263,7 +263,7 @@ cp_av_ds[:4]
     # 2  pod_1_ZC04  pod_1      ZC04  856  368 858.400000 365.400000
     # 3  pod_1_ZC04  pod_1      ZC04  897  344 896.600000 344.600000
 
-# %%
+# %%'
 
 # --- 4. Calculate Differences and Distance on Processed Data ---
 # .diff() must also be grouped to prevent calculating a large jump between the last point of one video
@@ -274,7 +274,38 @@ cp_av_ds['dy'] = cp_av_ds.groupby('video_id')['y_smooth'].diff()
 # Calculate the distance using the Pythagorean theorem, just like in your function.
 cp_av_ds['distance'] = np.sqrt(cp_av_ds['dx']**2 + cp_av_ds['dy']**2) 
 
-# %%
+# %%'
+
+cp_av_ds.shape
+    # Out[17]: (196341, 10)
+
+cp_av_ds[:8]
+    # Out[19]: 
+    #      video_id   time sample_ID    x    y   x_smooth   y_smooth        dx  \
+    # 0  pod_1_ZC04  pod_1      ZC04  763  420        NaN        NaN       NaN   
+    # 1  pod_1_ZC04  pod_1      ZC04  819  391 818.800000 391.000000       NaN   
+    # 2  pod_1_ZC04  pod_1      ZC04  856  368 858.400000 365.400000 39.600000   
+    # 3  pod_1_ZC04  pod_1      ZC04  897  344 896.600000 344.600000 38.200000   
+    # 4  pod_1_ZC04  pod_1      ZC04  917  331 917.000000 331.000000 20.400000   
+    # 5  pod_1_ZC04  pod_1      ZC04  928  324 928.200000 323.800000 11.200000   
+    # 6  pod_1_ZC04  pod_1      ZC04  936  329 936.400000 328.800000  8.200000   
+    # 7  pod_1_ZC04  pod_1      ZC04  941  328 941.000000 328.000000  4.600000   
+    
+    #           dy  distance  
+    # 0        NaN       NaN  
+    # 1        NaN       NaN  
+    # 2 -25.600000 47.154215  
+    # 3 -20.800000 43.495747  
+    # 4 -13.600000 24.517749  
+    # 5  -7.200000 13.314654  
+    # 6   5.000000  9.604166  
+    # 7  -0.800000  4.669047  
+
+# %%'
+
+cp_av_ds.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\cp_av_ds.pkl' )
+
+# %%'
 
 # --- 5. Calculate Total Distance Traveled Per Video ---
 print("Aggregating total distance per video...")
@@ -294,11 +325,11 @@ tdt[:4]
 
 tdt.rename( columns={'distance' : 'tdt_pixel'}, inplace=True )
 
-# %%
+# %%'
 
 tdt.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\tdt.pkl' )
 
-# %%
+# %%'
 
 # to add the height data to the tdt data :
     
@@ -331,7 +362,7 @@ image_height_analysis_opencv_2[:4]
     # 2  F:\OneDrive - Uniklinik RWTH Aachen\VISION\tra...  pod_4      ZC14  
     # 3  F:\OneDrive - Uniklinik RWTH Aachen\VISION\tra...  pod_7      ZC14  
 
-# %%
+# %%'
 
 # Merge 'tdt' and the prepared 'height_df'
 # The 'on' parameter tells Pandas to match rows using both 'time' and 'sample_ID'
@@ -374,13 +405,13 @@ tdt_height_2[:4]
     # 2  pod_1      ZC06 18499.849050  pod_1_ZC06.png                564  57.402014
     # 3  pod_1      ZC07  8868.898625  pod_1_ZC07.png                564  27.518746
 
-# %%
+# %%'
 
 tdt_height_2.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\tdt_height_2.pkl' )
 
 tdt_height_2 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\tdt_height_2.pkl' )
 
-# %%
+# %%'
 
 # now the groupings of treatments must be added.
 # first, wait, getting the groupings from the original file.
@@ -427,7 +458,7 @@ df_treatment_groups[-4:]
     # 80       NaN       NaN
     # 81       NaN       NaN
 
-# %% 
+# %%' 
 
 # didn't work because of duplicates in df_treatment_groups !
 
@@ -457,7 +488,7 @@ df_treatment_groups[-4:]
                 # 2     DBD-HTK  
                 # 3     DBD-HTK  
 
-# %%
+# %%'
 
 # Check for duplicates in the key column of the right dataframe
 id_counts = df_treatment_groups['sample_ID'].value_counts()
@@ -484,7 +515,9 @@ print(id_counts[id_counts > 1])
     # ZC06    2
     # Name: count, dtype: int64
 
-# %%
+# %%'
+
+# exploring the duplicate entry.
 
 mask_dup = df_treatment_groups['sample_ID'] == 'ZC06'
 
@@ -496,7 +529,7 @@ dup
     # 2      ZC06   DBD-HTK
     # 8      ZC06   DBD-HTK
 
-# %%
+# %%'
 
 # Create a dataframe with only one entry per sample_ID
 df_treatment_groups_unique = df_treatment_groups.drop_duplicates(subset=['sample_ID'])
@@ -508,7 +541,7 @@ df_treatment_groups_unique.shape
 df_treatment_groups.shape
     # Out[28]: (82, 2)
 
-# %%
+# %%'
 
 # --- Best Practice: Clean the DataFrame ---
 
@@ -532,16 +565,16 @@ df_treatment_groups_clean_unique['treatment'].unique()
 df_treatment_groups_clean_unique.shape
     # Out[52]: (65, 2)
 
-# %%
+# %%'
 
-# possible unnecessary, as there will be no drp-out !
+# possible unnecessary, as there will be no drop-out !
 
 df_treatment_groups_clean_unique_2 = df_treatment_groups_clean_unique.dropna(subset=['treatment'])
 
 df_treatment_groups_clean_unique_2.shape
     # Out[57]: (65, 2)
 
-# %%
+# %%'
 
 # Perform a left merge
 tdt_height_group = pd.merge(
@@ -576,16 +609,16 @@ tdt_height_group[:4]
     # 2     DBD-HTK  
     # 3  DBD-Ecosol  
 
-# %%
+# %%'
 
 tdt_height_group.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\tdt_height_group.pkl' )
 
-# %%
+# %%'
 
 tdt_height_group['treatment'].unique()
     # Out[47]: array(['DBD-HTK', 'DBD-Ecosol', 'DCD-HTK', 'NMP', nan, '-'], dtype=object)
 
-# %%
+# %%'
 
 # after plotting, in the legend of treatments : - : emerged as a category !
 # Here, I want to get more info about them !
@@ -595,7 +628,7 @@ tdt_height_group_unknown = tdt_height_group[ mask_unknown ]
 tdt_height_group_unknown.shape
     # Out[60]: (3, 7)
 
-# %%
+# %%'
 
 tdt_height_group_unknown
     # Out[61]: 
@@ -610,7 +643,7 @@ tdt_height_group_unknown
     # 97 180.894994         -  
 
 
-# %%
+# %%'
 
 # Create a boolean mask to identify the rows to KEEP.
 # A row is kept if its 'treatment' value is NOT NaN AND it is NOT equal to '-'.
@@ -619,13 +652,13 @@ mask_to_keep = (tdt_height_group['treatment'].notna()) & (tdt_height_group['trea
 # Apply the mask to your DataFrame to get the cleaned version.
 tdt_height_group_2 = tdt_height_group[mask_to_keep]
 
-# %%
+# %%'
 
 # 3 entries deleted, as expected.
 tdt_height_group_2.shape
     # Out[63]: (108, 7)
 
-# %%
+# %%'
 
 # Verify the result by checking the unique values and their counts.
 tdt_height_group_2.head()
@@ -658,7 +691,7 @@ tdt_height_group_2['treatment'].value_counts()
 tdt_height_group_2['time'].unique()
     # Out[69]: array(['pod_1', 'pod_3', 'pod_4', 'pod_7', 'retrain_2'], dtype=object)
 
-# %%
+# %%'
 
 # order the categories to be ready for plotting.
 treatment_order = [ 'DBD-HTK', 'DBD-Ecosol', 'DCD-HTK', 'NMP' ]
@@ -668,7 +701,7 @@ tdt_height_group_2['treatment'] = pd.Categorical(
                                             ordered=True
 )
 
-# %%
+# %%'
 
 time_order = [ 'retrain_2' , 'pod_1', 'pod_3', 'pod_4', 'pod_7' ]
 tdt_height_group_2['time'] = pd.Categorical(
@@ -677,7 +710,7 @@ tdt_height_group_2['time'] = pd.Categorical(
                                             ordered=True
 )
 
-# %%
+# %%'
 
 # this is because of a previous mistake !
 tdt_height_group_2 = tdt_height_group_2.drop(columns=['metric'])
@@ -688,9 +721,207 @@ Index(['time', 'sample_ID', 'tdt_pixel', 'file_name', 'sample_png_height',
        'tdt_meter', 'treatment'],
       dtype='object')
 
-# %%
+# %%'
 
 tdt_height_group_2.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\tdt_height_group_2.pkl' )
 
+tdt_height_group_2 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\tdt_height_group_2.pkl' )
+
+
+# %%'
+
+tdt_height_group_2.columns
+    # Out[10]: 
+    # Index(['time', 'sample_ID', 'tdt_pixel', 'file_name', 'sample_png_height',
+    #        'tdt_meter', 'treatment'],
+    #       dtype='object')
+
+# %%'
+
+# Perform a left merge
+cp_av_ds_3 = pd.merge(
+                        left=cp_av_ds_2,
+                        right=df_aggregate[[ 'video_id' , 'sample_png_height' ]], # 1 : bottom
+                        on='video_id',
+                        how='left'
+)
+# 1 : # Select only the columns you need from the right table.
+    # this includes the common ( on ) column !
+
+cp_av_ds_3[:4]
+    # Out[87]: 
+    #      video_id   time sample_ID    x    y   x_smooth   y_smooth        dx  \
+    # 0  pod_1_ZC04  pod_1      ZC04  763  420        NaN        NaN       NaN   
+    # 1  pod_1_ZC04  pod_1      ZC04  819  391 818.800000 391.000000       NaN   
+    # 2  pod_1_ZC04  pod_1      ZC04  856  368 858.400000 365.400000 39.600000   
+    # 3  pod_1_ZC04  pod_1      ZC04  897  344 896.600000 344.600000 38.200000   
+    
+    #           dy  distance   location   zone  \
+    # 0        NaN       NaN     center  inner   
+    # 1        NaN       NaN     center  inner   
+    # 2 -25.600000 47.154215     center  inner   
+    # 3 -20.800000 43.495747  periphery  outer   
+    
+    #                                            outer_roi  \
+    # 0  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    # 1  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    # 2  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    # 3  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    
+    #                                           inner_roi  sample_png_height  
+    # 0  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000  
+    # 1  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000  
+    # 2  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000  
+    # 3  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000  
+
 # %%
+
+cp_av_ds_3['velocity_meter_s'] = ( cp_av_ds_3['distance'] * (1.75 / cp_av_ds_3['sample_png_height']) ) / ( 1/3 )
+
+cp_av_ds_3['diff_velocity_meter_s'] = cp_av_ds_3.groupby('video_id')['velocity_meter_s'].diff()
+
+cp_av_ds_3['acceleration_meter_s2'] = cp_av_ds_3['diff_velocity_meter_s'] / ( 1/3 )
+
+# %%
+
+cp_av_ds_3.shape
+    # Out[93]: (196341, 19)
+
+cp_av_ds_3.columns
+    # Out[94]: 
+    # Index(['video_id', 'time', 'sample_ID', 'x', 'y', 'x_smooth', 'y_smooth', 'dx',
+    #        'dy', 'distance', 'location', 'zone', 'outer_roi', 'inner_roi',
+    #        'sample_png_height', 'diff_distance_pixel', 'velocity_meter_s',
+    #        'diff_velocity_meter_s', 'acceleration_meter_s2'],
+    #       dtype='object')
+
+cp_av_ds_3[:4]
+    # Out[95]: 
+    #      video_id   time sample_ID    x    y   x_smooth   y_smooth        dx  \
+    # 0  pod_1_ZC04  pod_1      ZC04  763  420        NaN        NaN       NaN   
+    # 1  pod_1_ZC04  pod_1      ZC04  819  391 818.800000 391.000000       NaN   
+    # 2  pod_1_ZC04  pod_1      ZC04  856  368 858.400000 365.400000 39.600000   
+    # 3  pod_1_ZC04  pod_1      ZC04  897  344 896.600000 344.600000 38.200000   
+    
+    #           dy  distance   location   zone  \
+    # 0        NaN       NaN     center  inner   
+    # 1        NaN       NaN     center  inner   
+    # 2 -25.600000 47.154215     center  inner   
+    # 3 -20.800000 43.495747  periphery  outer   
+    
+    #                                            outer_roi  \
+    # 0  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    # 1  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    # 2  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    # 3  [[183, 66], [1130, 66], [1130, 1001], [183, 10...   
+    
+    #                                           inner_roi  sample_png_height  \
+    # 0  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000   
+    # 1  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000   
+    # 2  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000   
+    # 3  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000   
+    
+    #    diff_distance_pixel  velocity_meter_s  diff_velocity_meter_s  \
+    # 0                  NaN               NaN                    NaN   
+    # 1                  NaN               NaN                    NaN   
+    # 2                  NaN               NaN                    NaN   
+    # 3            -3.658468         -0.034055                    NaN   
+    
+    #    acceleration_meter_s2  
+    # 0                    NaN  
+    # 1                    NaN  
+    # 2                    NaN  
+    # 3                    NaN  
+
+
+cp_av_ds_3.iloc[ 10:14 , -4: ]
+    # Out[98]: 
+    #     diff_distance_pixel  velocity_meter_s  diff_velocity_meter_s  \
+    # 10            -0.821854         -0.007650              -0.007650   
+    # 11             0.821854          0.007650               0.015300   
+    # 12            -0.821854         -0.007650              -0.015300   
+    # 13            -1.214214         -0.011303              -0.003652   
+    
+    #     acceleration_meter_s2  
+    # 10              -0.022951  
+    # 11               0.045901  
+    # 12              -0.045901  
+    # 13              -0.010957  
+
+# %%
+
+cp_av_ds_3.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\cp_av_ds_3.pkl' )
+
+# %%
+
+# Use .groupby() to group the data by each unique 'video_id'.
+# Then, use .agg() to specify the calculations for your columns of interest.
+kinematics_summary = cp_av_ds_3.groupby('video_id').agg(
+                                                        # For the velocity column, calculate both mean and max
+                                                        velocity_mean =('velocity_meter_s', 'mean'),
+                                                        velocity_max =('velocity_meter_s', 'max'),
+                                                        
+                                                        # For the acceleration column, also calculate mean and max
+                                                        acceleration_mean =('acceleration_meter_s2', 'mean'),
+                                                        acceleration_max =('acceleration_meter_s2', 'max')
+).reset_index() # .reset_index() converts 'video_id' from an index back into a column.
+
+
+# %%
+
+kinematics_summary[:4]
+    # Out[105]: 
+    #      video_id  velocity_mean  velocity_max  acceleration_mean  \
+    # 0  pod_1_ZC04       0.049894      0.890042          -0.000662   
+    # 1  pod_1_ZC05       0.138390      1.698155          -0.000092   
+    # 2  pod_1_ZC06       0.095776      0.903762          -0.000186   
+    # 3  pod_1_ZC07       0.045941      0.416664           0.000096   
+    
+    #    acceleration_max  
+    # 0          1.260429  
+    # 1          1.555279  
+    # 2          1.045949  
+    # 3          0.568699 
+
+kinematics_summary.shape
+    # Out[107]: (111, 5)
+
+kinematics_summary.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\kinematics_summary.pkl' )
+
+# %%
+
+cp_av_ds_3['distance'].min()
+    # Out[102]: 0.0
+
+# %%
+
+# Perform a left merge
+df_aggregate_track = pd.merge(
+                                left=df_aggregate,
+                                right=kinematics_summary, # 1 : bottom
+                                on='video_id',
+                                how='left'
+)
+# 1 : # Select only the columns you need from the right table.
+
+# %%
+
+df_aggregate_track.shape
+    # Out[110]: (108, 13)
+
+df_aggregate_track.columns
+    # Out[111]: 
+    # Index(['time', 'sample_ID', 'tdt_pixel', 'file_name', 'sample_png_height',
+    #        'tdt_meter', 'treatment', 'video_id', 'inner_zone_percentage',
+    #        'velocity_mean', 'velocity_max', 'acceleration_mean',
+    #        'acceleration_max'],
+    #       dtype='object')
+
+# %%
+
+df_aggregate_track.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track.pkl' )
+
+
+# %%
+
 
