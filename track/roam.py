@@ -3,18 +3,25 @@
     # the probablity of standing on various spots ( grid ) in the open-field.
     # heatmap !
 
+# %%'
+
+# determine a grid on the open-field.
+# at each frame, determine to which grid cell it belongs to.
+
 # %%
 
 # --- 1. Configuration ---
 # Define the grid size. A 10x10 grid is a good starting point.
 GRID_SIZE = (10, 10) # (columns, rows)
 
-# %%
+# %%'
 
-# ---  Define a function that operates on a single row ---
-# this function can then be applied to the dataframe.
-# This function now expects the entire row object as its first argument.
-# Additional parameters (roi_bboxes, grid_size) can be passed through .apply().
+
+# ---  Define a function that operates on a single row ( of a dataframe ) ---
+    # technical ( related to how the function is written )
+        # this function can then be applied to the dataframe.
+        # This function now expects the entire row object as its first argument.
+        # Additional parameters (roi_bboxes, grid_size) can be passed through .apply().
 def get_grid_cell_from_row(row, roi_definitions, grid_size):
     """
         Calculates the grid cell for a given DataFrame row.
@@ -49,12 +56,12 @@ def get_grid_cell_from_row(row, roi_definitions, grid_size):
     return (col, row)
 
 
-# %%
+# %%'
 
 
 # --- 3. Apply this to your cp_av_ds_3 ---
 
-# %%
+# %%'
 
 # First, we need the bounding box for each video's ROI.
 # We can pre-calculate this from your df_roi_data DataFrame.
@@ -74,7 +81,7 @@ for _ , row in df_roi_data.iterrows():
 print(f"Successfully calculated {len(roi_bboxes)} bounding boxes.")
 # Successfully calculated 111 bounding boxes.
 
-# %%
+# %%'
 
 # Save the Bounding Boxes to a New JSON File ---
 output_bbox_file = r"F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\roi_bounding_boxes.json"
@@ -82,7 +89,7 @@ with open(output_bbox_file, 'w') as f:
     # json.dump() writes the dictionary to the file in a structured way.
     json.dump(roi_bboxes, f, indent=4)
 
-# %%
+# %%'
 
 # --- 3. Add Bounding Boxes to the cp_av_ds_3 DataFrame ---
 # The most efficient way to do this is using the .map() method.
@@ -129,7 +136,7 @@ Out[14]:
 # 2                    NaN  [183, 66, 947, 935]  
 # 3              -0.102165  [183, 66, 947, 935]  
 
-# %%
+# %%'
 
 # Now, create a new 'grid_cell' column in your main trajectory DataFrame.
 # The .apply() method can pass your function directly.
@@ -142,7 +149,7 @@ cp_av_ds_3['grid_cell'] = cp_av_ds_3.apply(
 )
 
 
-# %%
+# %%'
 
 cp_av_ds_3[:4]
     # Out[22]: 
@@ -192,9 +199,9 @@ cp_av_ds_3['grid_cell'][:4]
     # 3    (7, 2)
     # Name: grid_cell, dtype: object
 
-# %%
+# %%' coverage
 
-# Group by video and count the number of unique cells visited.
+# count the number of unique cells visited.
 # We use .nunique() which counts unique non-null values.
 exploration_score = cp_av_ds_3.groupby('video_id')['grid_cell'].nunique().reset_index()
 
@@ -212,7 +219,7 @@ exploration_score[:4]
     # 2  pod_1_ZC06    79
     # 3  pod_1_ZC07    35
 
-# %%
+# %%'
 
 # You can also express this as a percentage of total cells.
 # pocw : percentage of cells walked ( out of 100 cells [ 10 * 10 grid ] ).
@@ -228,7 +235,7 @@ exploration_score[:4]
     # 2  pod_1_ZC06    79 79.000000
     # 3  pod_1_ZC07    35 35.000000
 
-# %%
+# %%'
 
 df_aggregate_track_2 = pd.merge(
                                     df_aggregate_track, 
@@ -239,15 +246,14 @@ df_aggregate_track_2 = pd.merge(
 df_aggregate_track_2.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_2.pkl' )
 
 
-# %%
+# %%'
 
 exploration_score.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\exploration_score.pkl' )
 
-# %%
-# %%
+# %%'
+# %%' number of frames  
 
-# generalizing the above ( for all videos ).
-# Count the number of frames spent in each cell.
+# Count the number of frames ( amount o time spent ) spent in each cell.
 # the amount of time the animal spent on each cell it stepped in.
     # _count_ : the number of frames for each cell.
 cell_counts_all_videos = cp_av_ds_3.groupby('video_id')['grid_cell'].value_counts().reset_index()
@@ -266,7 +272,7 @@ cell_counts_all_videos[:4]
     # 2  pod_1_ZC04    (7, 4)    199
     # 3  pod_1_ZC04    (6, 1)    192
 
-# %%
+# %%' percentage of time
 
 # perhaps the more important is the percentage of time the animal spent in each frame.
     # relative to the total 1000 minuts time of the video.
@@ -287,7 +293,7 @@ cell_percentages_df[:4]
     # 2  pod_1_ZC04    (7, 4)   11.060000
     # 3  pod_1_ZC04    (6, 1)   10.670000
 
-# %%
+# %%'
 
 df_cell_count_percentage = pd.merge(
                                     cell_counts_all_videos, 
@@ -295,11 +301,11 @@ df_cell_count_percentage = pd.merge(
                                     on=['video_id', 'grid_cell']
 )
 
-# %%
+# %%'
 
 df_cell_count_percentage.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_cell_count_percentage.pkl' )
 
-# %%
+# %%'
 
 df_cell_count_percentage.shape
     # Out[55]: (7777, 4)
@@ -312,4 +318,95 @@ df_cell_count_percentage[:4]
     # 2  pod_1_ZC04    (7, 4)    199   11.060000
     # 3  pod_1_ZC04    (6, 1)    192   10.670000
 
-# %%
+# %%'
+# %%' entropy
+
+# this section explores the evenness of visiting the open-field.
+
+# %% shannon
+
+# --- 1. Define a function to calculate entropy for one video's data ---
+def calculate_shannon_entropy(series):
+    """Calculates the Shannon's Entropy for a pandas Series of proportions."""
+    # Convert percentages to proportions (e.g., 25.5 -> 0.255)
+    proportions = series / 100
+    
+    # The core entropy formula: H = -Σ(p * log2(p))
+    # We filter out p=0 to avoid log(0) errors, though it shouldn't happen with value_counts.
+    proportions = proportions[proportions > 0]
+    
+    return -np.sum(proportions * np.log2(proportions))
+
+# %%'
+
+# --- 2. Calculate Entropy for Each Video ---
+# We group by video_id and apply our function to the 'percentage' column for each group.
+entropy_per_video = (
+                    df_cell_count_percentage.groupby('video_id')['percentage']
+                    .apply(calculate_shannon_entropy)
+                    .reset_index(name='shannon_entropy')
+)
+
+entropy_per_video.shape
+    # Out[25]: (111, 2)
+
+entropy_per_video[:4]
+    # Out[26]: 
+    #      video_id  shannon_entropy
+    # 0  pod_1_ZC04         4.095035
+    # 1  pod_1_ZC05         5.046960
+    # 2  pod_1_ZC06         5.018722
+    # 3  pod_1_ZC07         4.473029
+
+# %%'
+
+df_aggregate_track_3 = pd.merge(
+                                    df_aggregate_track_2 , 
+                                    entropy_per_video , 
+                                    on=['video_id']
+)
+
+df_aggregate_track_3.shape
+    # Out[28]: (108, 16)
+
+df_aggregate_track_3.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_3.pkl' )
+
+
+# %%' uniformity_index
+
+
+# --- 4. Merge the Data and Calculate the Uniformity Index ---
+# Merge the entropy results with the cell counts.
+df_aggregate_track_3 = pd.merge(entropy_per_video, cells_visited_per_video)
+
+# Calculate the maximum possible entropy for the number of cells visited (H_max = log2(N)).
+# We add a check to avoid log2(1) which is 0 and would cause division by zero.
+df_aggregate_track_3['max_entropy'] = np.log2(df_aggregate_track_3['nocw'])
+df_aggregate_track_3['max_entropy'].replace(0, np.nan, inplace=True) # Replace 0 with NaN
+
+# The Uniformity Index is the actual entropy divided by the maximum possible entropy.
+# We fill any NaN results (from the above step) with 0. 
+    # A single visited cell has 0 uniformity.
+df_aggregate_track_3['uniformity_index'] = (
+                df_aggregate_track_3['shannon_entropy'] / df_aggregate_track_3['max_entropy']
+).fillna(0)
+
+
+df_aggregate_track_3.iloc[ :4 , -5:]
+    # Out[33]: 
+    #    nocw      pocw  shannon_entropy  max_entropy  uniformity_index
+    # 0    49 49.000000         4.095035     5.614710          0.729341
+    # 1    70 70.000000         5.046960     6.129283          0.823418
+    # 2    79 79.000000         5.018722     6.303781          0.796145
+    # 3    35 35.000000         4.473029     5.129283          0.872057
+
+
+df_aggregate_track_3.shape
+    # Out[34]: (108, 18)
+
+# %%'
+
+df_aggregate_track_3.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_3.pkl' )
+
+# %%'
+

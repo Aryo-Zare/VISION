@@ -2,6 +2,13 @@
 # install the package :
     # conda install conda-forge::pynvml
 
+# %% cmd
+
+# cmd
+    # CUDA version
+        # nvcc --version   
+# nvidia-smi
+
 # %%
 
 from pynvml import \

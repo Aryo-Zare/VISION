@@ -32,7 +32,7 @@ cp_av_ds_3 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\
 
 # aggregate 
 # last saved in : position.py
-df_aggregate_track_2 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_2.pkl' )
+df_aggregate_track_3 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_3.pkl' )
 
 # %%
 # %%
@@ -55,9 +55,10 @@ with open( path_json , 'r') as f:
 
 # %% bbox
 
-# this is the same as the ROI but in a differnet fromat :
-        # instead of the exact coordinates of the corners : 
-            # only coordinate of the bottom-left corenr + width & hwight of the rectangle.
+# bounding box
+    # this is the same as the ROI but in a differnet fromat :
+            # instead of the exact coordinates of the corners : 
+                # only coordinate of the bottom-left corenr + width & hwight of the rectangle.
 # Save the Bounding Boxes to a New JSON File ---
 output_bbox_file = r"F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\roi_bounding_boxes.json"
 with open(output_bbox_file, 'r') as f:
@@ -66,11 +67,6 @@ with open(output_bbox_file, 'r') as f:
 # %%
 # %%
 
-# roam.py
-# for all videos.
-# the number of unique cells ( out of 100 total ) that the animal explored ( stepped in ).
-exploration_score = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\exploration_score.pkl' )
-
 
 # roam.py
 # for all videos.
@@ -78,6 +74,16 @@ exploration_score = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION
     # _count_ : the number of frames for each cell.
 # 7777
 df_cell_count_percentage = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_cell_count_percentage.pkl' )
+
+
+# not needed !
+    # merged with : df_aggregate_track_2
+        # 'nocw' & 'pocw' columns
+# roam.py
+# for all videos.
+# the number of unique cells ( out of 100 total ) that the animal explored ( stepped in ).
+exploration_score = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\exploration_score.pkl' )
+
 
 # %%
 
