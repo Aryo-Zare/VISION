@@ -82,6 +82,7 @@ import random
 
 # %%
 
+# plot 2 random videos.
 
 # Assume 'df_cell_count_percentage' is your DataFrame with columns:
 # 'video_id', 'grid_cell', 'count', 'percentage'
@@ -112,7 +113,7 @@ fig, axes = plt.subplots(1, 2, figsize=(20, 10))
 # The index is used to select the correct subplot axis (axes[0] or axes[1]).
 for i, video_id in enumerate(videos_to_plot):
     # Select the data for the current video
-    video_data = df_cell_count_percentage[df_cell_count_percentage['video_id'] == video_id]
+    video_data = df_cell_count_percentage[ df_cell_count_percentage['video_id'] == video_id ]
     
     #explore
     # video_data.columns

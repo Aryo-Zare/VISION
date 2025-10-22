@@ -253,7 +253,7 @@ exploration_score.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\
 # %%'
 # %%' number of frames  
 
-# Count the number of frames ( amount o time spent ) spent in each cell.
+# Count the number of frames ( amount of time spent ) spent in each cell.
 # the amount of time the animal spent on each cell it stepped in.
     # _count_ : the number of frames for each cell.
 cell_counts_all_videos = cp_av_ds_3.groupby('video_id')['grid_cell'].value_counts().reset_index()
@@ -274,8 +274,8 @@ cell_counts_all_videos[:4]
 
 # %%' percentage of time
 
-# perhaps the more important is the percentage of time the animal spent in each frame.
-    # relative to the total 1000 minuts time of the video.
+# perhaps the more important is the percentage of time the animal spent on each grid.
+    # relative to the total 10 minutes time of the video.
 # The recommended, readable, and efficient way to write the code
 cell_percentages_df = (
                         cp_av_ds_3.groupby('video_id')['grid_cell']
@@ -409,4 +409,90 @@ df_aggregate_track_3.shape
 df_aggregate_track_3.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_3.pkl' )
 
 # %%'
+# %% organization
+
+# not the correct way of merging : 
+    # colmmon columns are also merged with aded column name suffix ; -x , -y !
+
+                df_aggregate_track_4 = pd.merge(
+                                                    df_aggregate_track_3 , 
+                                                    df_roi_data , 
+                                                    on=['video_id']
+                )
+    
+                    # Out[24]: 
+                    # Index(['time_x', 'sample_ID_x', 'tdt_pixel', 'file_name', 'sample_png_height',
+                    #        'tdt_meter', 'treatment', 'video_id', 'inner_zone_percentage',
+                    #        'velocity_mean', 'velocity_max', 'acceleration_mean',
+                    #        'acceleration_max', 'nocw', 'pocw', 'shannon_entropy', 'max_entropy',
+                    #        'uniformity_index', 'outer_roi', 'inner_roi', 'time_y', 'sample_ID_y'],
+                    #       dtype='object')
+                
+                df_aggregate_track_4.shape
+                    # Out[21]: (108, 22)
+
+
+# %% organization
+
+# organization : merging data.
+
+# Select only the key column ('video_id') and the columns you want to add
+# from the right DataFrame.
+right_df_subset = df_roi_data[['video_id', 'inner_roi', 'outer_roi']]
+
+# Perform a left merge.
+# This keeps all columns and rows from the left DataFrame ('df_aggregate_track_3')
+# and adds the selected columns from the right one, matching on 'video_id'.
+df_aggregate_track_4 = pd.merge(
+    df_aggregate_track_3, 
+    right_df_subset, 
+    on='video_id', 
+    how='left'
+)
+
+
+df_aggregate_track_4.shape
+    # Out[27]: (108, 20)
+
+
+df_aggregate_track_4.columns
+    # Out[28]: 
+    # Index(['time', 'sample_ID', 'tdt_pixel', 'file_name', 'sample_png_height',
+    #        'tdt_meter', 'treatment', 'video_id', 'inner_zone_percentage',
+    #        'velocity_mean', 'velocity_max', 'acceleration_mean',
+    #        'acceleration_max', 'nocw', 'pocw', 'shannon_entropy', 'max_entropy',
+    #        'uniformity_index', 'inner_roi', 'outer_roi'],
+    #       dtype='object')
+
+# %%'
+
+df_aggregate_track_4.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_4.pkl' )
+
+# %% organization
+
+# organization : merging data.
+
+# Create a new column 'bbox_roi' in your DataFrame.
+# The .map() method looks up each 'video_id' in the 'roi_bboxes' dictionary
+# and places the corresponding value in the new column.
+df_aggregate_track_4['bbox_roi'] = df_aggregate_track_4['video_id'].map(roi_bboxes)
+
+df_aggregate_track_4.shape
+    # Out[36]: (108, 21)
+
+df_aggregate_track_4.columns
+    # Out[37]: 
+    # Index(['time', 'sample_ID', 'tdt_pixel', 'file_name', 'sample_png_height',
+    #        'tdt_meter', 'treatment', 'video_id', 'inner_zone_percentage',
+    #        'velocity_mean', 'velocity_max', 'acceleration_mean',
+    #        'acceleration_max', 'nocw', 'pocw', 'shannon_entropy', 'max_entropy',
+    #        'uniformity_index', 'inner_roi', 'outer_roi', 'bbox_roi'],
+    #       dtype='object')
+
+# %%'
+
+df_aggregate_track_4.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_4.pkl' )
+
+# %%'
+
 

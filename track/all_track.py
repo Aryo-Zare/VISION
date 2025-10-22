@@ -774,7 +774,7 @@ cp_av_ds_3[:4]
     # 2  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000  
     # 3  [[419, 299], [893, 299], [893, 767], [419, 767]]         564.000000  
 
-# %%
+# %%'
 
 cp_av_ds_3['velocity_meter_s'] = ( cp_av_ds_3['distance'] * (1.75 / cp_av_ds_3['sample_png_height']) ) / ( 1/3 )
 
@@ -782,7 +782,7 @@ cp_av_ds_3['diff_velocity_meter_s'] = cp_av_ds_3.groupby('video_id')['velocity_m
 
 cp_av_ds_3['acceleration_meter_s2'] = cp_av_ds_3['diff_velocity_meter_s'] / ( 1/3 )
 
-# %%
+# %%'
 
 cp_av_ds_3.shape
     # Out[93]: (196341, 19)
@@ -848,11 +848,11 @@ cp_av_ds_3.iloc[ 10:14 , -4: ]
     # 12              -0.045901  
     # 13              -0.010957  
 
-# %%
+# %%'
 
 cp_av_ds_3.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\cp_av_ds_3.pkl' )
 
-# %%
+# %%'
 
 # Use .groupby() to group the data by each unique 'video_id'.
 # Then, use .agg() to specify the calculations for your columns of interest.
@@ -867,7 +867,7 @@ kinematics_summary = cp_av_ds_3.groupby('video_id').agg(
 ).reset_index() # .reset_index() converts 'video_id' from an index back into a column.
 
 
-# %%
+# %%'
 
 kinematics_summary[:4]
     # Out[105]: 
@@ -888,12 +888,12 @@ kinematics_summary.shape
 
 kinematics_summary.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\kinematics_summary.pkl' )
 
-# %%
+# %%'
 
 cp_av_ds_3['distance'].min()
     # Out[102]: 0.0
 
-# %%
+# %%'
 
 # Perform a left merge
 df_aggregate_track = pd.merge(
@@ -904,7 +904,7 @@ df_aggregate_track = pd.merge(
 )
 # 1 : # Select only the columns you need from the right table.
 
-# %%
+# %%'
 
 df_aggregate_track.shape
     # Out[110]: (108, 13)
@@ -917,11 +917,191 @@ df_aggregate_track.columns
     #        'acceleration_max'],
     #       dtype='object')
 
-# %%
+# %%'
 
 df_aggregate_track.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track.pkl' )
 
+# %% removing the video_ids with low number of frames.
+
+# removing the video_ids with low number of frames.
+
+frame_counts = cp_av_ds_3['video_id'].value_counts()
+
+frame_counts.shape
+    # Out[53]: (111,)
+
+frame_counts[:4]
+    # Out[54]: 
+    # video_id
+    # pod_1_ZC04    1800
+    # pod_4_ZC67    1800
+    # pod_7_ZC20    1800
+    # pod_7_ZC19    1800
+    # Name: count, dtype: int64
+
+frame_counts.min()
+    # Out[55]: 16
+
+frame_counts.max()
+    # Out[56]: 1800
+
+# Sort ascending and get first 4
+frame_counts.sort_values(ascending=True)[:25]
+    # Out[64]: 
+    # video_id
+    # pod_7_ZC66          16
+    # pod_4_ZC20         163
+    # pod_3_ZC17        1789
+    # pod_1_ZC60        1794
+    # pod_7_ZC68        1797
+    # pod_1_ZC69        1797
+    # retrain_2_ZC65    1799
+    # retrain_2_ZC64    1799
+    # retrain_2_ZC63    1799
+    # pod_3_ZC68        1799
+    # retrain_2_ZC61    1799
+    # pod_1_ZC63        1799
+    # pod_4_ZC68        1799
+    # pod_3_ZC65        1799
+    # pod_1_ZC62        1799
+    # pod_1_ZC65        1799
+    # retrain_2_ZC67    1799
+    # pod_3_ZC61        1799
+    # pod_4_ZC63        1799
+    # pod_7_ZC63        1799
+    # pod_3_ZC63        1799
+    # pod_1_ZC09        1800
+    # pod_1_ZC10        1800
+    # pod_1_ZC11        1800
+    # pod_1_ZC14        1800
+    # Name: count, dtype: int64
+
+frame_counts.sort_values(ascending=False)[:4]
+    # Out[58]: 
+    # video_id
+    # pod_1_ZC04    1800
+    # pod_1_ZC11    1800
+    # pod_1_ZC15    1800
+    # pod_1_ZC17    1800
+    # Name: count, dtype: int64
+
+cp_av_ds_3.shape
+    # Out[66]: (196341, 21)
+
+# %% check if these video_ids exist in the aggregate datafram.
+
+# check if these video_ids exist in the aggregate datafram.
+
+# List of the video IDs you want to check for
+ids_to_check = ['pod_7_ZC66', 'pod_4_ZC20']
+
+# For fast lookups, convert the 'video_id' column to a Python set
+unique_video_ids = set(df_aggregate_track_4['video_id'])
+
+print("--- Checking for Video ID existence ---")
+
+# Loop through your list and check if each ID is in the set
+for video_id in ids_to_check:
+    is_present = video_id in unique_video_ids
+    print(f"Is '{video_id}' present in the 'video_id' column? {is_present}")
+
+# %%'
+# %% remove the abnormal videos.
+
+# remove the abnormal videos.
+
+# 1. Define the list of video_ids you want to remove
+ids_to_remove = ['pod_7_ZC66', 'pod_4_ZC20']
 
 # %%
+
+# The '~' operator inverts the boolean mask, so we are KEEPING all rows
+# where the 'video_id' is NOT IN our list.
+mask_remove_original_df = ~cp_av_ds_3['video_id'].isin(ids_to_remove)
+cp_av_ds_4 = cp_av_ds_3[ mask_remove_original_df ]
+
+cp_av_ds_4.shape
+    # Out[68]: (196162, 21)
+
+cp_av_ds_4.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\cp_av_ds_4.pkl' )
+
+# %%
+
+df_aggregate_track_4.shape
+    # Out[69]: (108, 21)
+
+# Apply the same logic to the aggregate dataframe
+mask_remove_aggregate_df = ~df_aggregate_track_4['video_id'].isin(ids_to_remove)
+df_aggregate_track_5 = df_aggregate_track_4[ mask_remove_aggregate_df ]
+
+df_aggregate_track_5.shape
+    # Out[70]: (106, 21)
+
+# %%
+# %%
+
+frame_counts = cp_av_ds_4['video_id'].value_counts()
+
+frame_counts.shape
+    # Out[72]: (109,)
+
+frame_counts[:4]
+    # Out[73]: 
+    # video_id
+    # pod_1_ZC04    1800
+    # pod_4_ZC67    1800
+    # pod_7_ZC20    1800
+    # pod_7_ZC19    1800
+    # # Name: count, dtype: int64
+
+# %%
+
+# Create a new column 'frame_count' in your aggregate DataFrame.
+# The .map() method uses the 'video_id' from each row to look up the
+# corresponding value in the 'frame_counts' Series.
+# tnf : total number of frames : per video.
+df_aggregate_track_5['tnf'] = df_aggregate_track_5['video_id'].map(frame_counts)
+
+# %%
+
+# velocity_mean_r_ms : 
+    # r : ratio : calculated via division of total distance traveled during the whole video / the time of the whole video in 's'.
+    # this is in contrast to 'velocity_mean', where it is the mean of velocity from inividiual steps.
+    # hence, this should be more accurate !
+    # mean velocity in m/s : 
+    # note, the data here is downsampled by factor-10, hence division by 3 in the last part of the line.
+df_aggregate_track_5['velocity_mean_r_ms'] = df_aggregate_track_5['tdt_meter'] / ( df_aggregate_track_5['tnf'] / 3 )
+
+# %% comparison
+
+# comparing the 2 types of velocity estimations.
+    # very similar !
+df_aggregate_track_5[[ 'velocity_mean_r_ms' , 'velocity_mean' ]][:4]
+    # Out[76]: 
+    #    velocity_mean_r_ms  velocity_mean
+    # 0            0.049839       0.049894
+    # 1            0.138236       0.138390
+    # 2            0.095670       0.095776
+    # 3            0.045865       0.045941
+
+
+# %% rename a treatment entry
+
+rename_map = {
+    'DBD-Ecosol': 'DBD-Omnisol'
+}
+
+# Apply the replacement to the 'treatment' column
+# This finds 'DBD-Ecosol' and replaces it with 'DBD-Omnisol'
+df_aggregate_track_5['treatment'] = df_aggregate_track_5['treatment'].replace(rename_map)
+
+# note : cp_av_ds_4 : does not have any 'treatment' column. Hence, no need for renaming it !
+
+# %%
+
+df_aggregate_track_5.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_5.pkl' )
+
+# %%
+
 
 
