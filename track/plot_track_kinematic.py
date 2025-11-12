@@ -15,7 +15,7 @@ custom_palette = {
 
 # Create a FacetGrid where each facet corresponds to a specific metric
 g = sns.FacetGrid( 
-                    df_track_tidy_kinematic , 
+                    df_track_tidy_kinematic_3 , 
                     col="metric", 
                     col_wrap=2, 
                     sharex=False , 
@@ -149,8 +149,8 @@ plt.tight_layout( rect=[0, 0, 0.85 , 1] )
 
 # bc : baseline corrected
 
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\kinematic\kinematic.pdf' )
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\kinematic\kinematic.svg' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\kinematic\kinematic_2.pdf' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\kinematic\kinematic_2.svg' )
 
 # %%'
 

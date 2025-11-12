@@ -31,11 +31,11 @@ df_subset = df_aggregate_track_5[id_columns + readout_parameters]
 
 # Melt the DataFrame to convert it to a long format
 df_track_tidy = pd.melt(
-    df_subset,
-    id_vars=id_columns,              # Columns to keep as they are (identifiers)
-    value_vars=readout_parameters,   # Columns to "unpivot" into rows
-    var_name='metric',               # Name of the new column for the measurement type
-    value_name='value'               # Name of the new column for the measurement value
+                        df_subset,
+                        id_vars=id_columns,              # Columns to keep as they are (identifiers)
+                        value_vars=readout_parameters,   # Columns to "unpivot" into rows
+                        var_name='metric',               # Name of the new column for the measurement type
+                        value_name='value'               # Name of the new column for the measurement value
 )
 
 # %%
@@ -89,6 +89,10 @@ df_track_tidy['metric'].unique()
 
 
 # %% split the dataframe.
+
+# this is to make them ready for creating separate figures.
+    # each figure with subplots corresponding to the selected metrics.
+
 # %% roam
 
 # List of metrics for the "roaming" DataFrame

@@ -15,9 +15,9 @@ custom_palette = {
 
 # Create a FacetGrid where each facet corresponds to a specific metric
 g = sns.FacetGrid( 
-                    df_track_tidy_roam_2 , 
+                    df_track_tidy_kinematic_2 , 
                     col="metric", 
-                    col_wrap=1, 
+                    col_wrap=2, 
                     sharex=False , 
                     sharey=False ,  # this value is True by default !! : change it to False !!
                     height=6, 
@@ -29,14 +29,14 @@ g = sns.FacetGrid(
 # g
 # pointplot
 g.map_dataframe( 
-                    sns.pointplot ,    
+                    sns.stripplot ,    
                     x='time' , 
                     y='value' ,  # 'value' or 'value_bc'
                     hue="treatment",
                     palette=custom_palette ,
                     marker="o" ,  
-                    estimator='mean' ,    
-                    errorbar='sd' ,
+                    # estimator='mean' ,    
+                    # errorbar='sd' ,
                     dodge= 0.2
 ) 
 
@@ -81,9 +81,11 @@ g.axes.flat[-1].set_xlabel("Time" , loc='right' , fontsize=24 )
     # first check the plot without running this cell to make sure each plot corresponds to your desired order-title.
 
 new_titles = [ 
-                    'percent time animal resided in the inner-zone', 
-                    'percentage of total number of grid-cells walked', 
-                    'uniformity index'
+                'Average velocity',
+                'Maximum velocity',
+                'Average accelration',
+                'Maximum acceleration',
+                'Total distance walked'
             ]
 
 for ax , i in zip( g.axes.flat , new_titles ):
@@ -91,7 +93,13 @@ for ax , i in zip( g.axes.flat , new_titles ):
 
 # %%'
 
-unit = [ '% time' , '% grid-cells' , '' ]
+unit = [
+        '$m/s$',                 # Velocity
+        '$m/s$',                 # Velocity
+        r'$\frac{m}{s^2}$',      # Acceleration (stacked fraction)
+        r'$\frac{m}{s^2}$',      # Acceleration (stacked fraction)
+        '$m$'                    # Distance
+]
 
 for ax , i in zip( g.axes.flat , unit ) :
     ax.set_ylabel( i , loc='top' , fontsize=20 )
@@ -99,7 +107,7 @@ for ax , i in zip( g.axes.flat , unit ) :
 # %%'
 
 # x= : the x location of the text in figure coordinates.
-plt.suptitle( 'Roaming behavior of animal in the open-field' , x=0.4 , fontsize=24 )
+plt.suptitle( 'Kinematic behavior in the open-field' , x=0.4 , fontsize=24 )
 
 # %% add subplot indexing letters
 
@@ -135,16 +143,51 @@ for ax, letter in zip(g.axes.flatten(), letters):
 # %%'
 
 # rect : to avoid overlapping of the legend on the figure.
-plt.tight_layout( rect=[0, 0, 0.82 , 1] )
+plt.tight_layout( rect=[0, 0, 0.85 , 1] )
 
 # %%'
 
 # bc : baseline corrected
 
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\roam_2.pdf' )
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\roam_2.svg' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\outlier\outlier_kinematic.pdf' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\outlier\outlier_kinematic.svg' )
 
-# %%'
+# %%' plotly
+
+import plotly.express as px
+
+# %%
+
+# you should explicitly set the x-axis order.
+    # plotly does not undertand pandas cat orders !
+# Get the correct category order from your DataFrame
+time_order = df_track_tidy_kinematic_2['time'].cat.categories.tolist()
+# time_order
+#     # Out[27]: ['retrain_2', 'pod_1', 'pod_3', 'pod_4', 'pod_7']
+
+# This one command replaces your entire FacetGrid and g.map_dataframe code
+fig = px.strip(
+    df_track_tidy_kinematic_2,
+    x='time',
+    y='value',
+    color='treatment',      # Replaces 'hue'
+    facet_row='metric',     # Replaces 'col' (facet_row is often better for long plots)
+    hover_data=['video_id'], # <-- This is the magic!
+    color_discrete_map=custom_palette , # Pass your palette here
+    category_orders={'time': time_order}  # Explicitly set the x-axis order
+)
+
+# This updates the y-axes to be independent, just like your 'sharey=False'
+fig.update_yaxes(matches=None)
+# This shows the plot in your notebook or a new browser tab
+
+# %%
+
+file_path = r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\outlier\outlier_kinematic.html'
+fig.write_html(file_path)
+
+
+# %%
 
 
 

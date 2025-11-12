@@ -776,6 +776,7 @@ cp_av_ds_3[:4]
 
 # %%'
 
+# 1/3 : 1/3 s : downsample data by factor 10 : original data : 30-frames / second.
 cp_av_ds_3['velocity_meter_s'] = ( cp_av_ds_3['distance'] * (1.75 / cp_av_ds_3['sample_png_height']) ) / ( 1/3 )
 
 cp_av_ds_3['diff_velocity_meter_s'] = cp_av_ds_3.groupby('video_id')['velocity_meter_s'].diff()
@@ -1100,6 +1101,101 @@ df_aggregate_track_5['treatment'] = df_aggregate_track_5['treatment'].replace(re
 # %%
 
 df_aggregate_track_5.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_5.pkl' )
+
+# %%
+# %% acceleration spitting
+
+# as in a bound area, positive & negaive accelerations balance each-other  : mean of the acceleration is almost 0.
+    # the proper way of evaluating acceleration is dividing it to '+' & '-' values.
+
+# --- 1. Define your custom aggregation functions ---
+
+def mean_positive(series):
+    """Calculates the mean of only the positive values."""
+    return series[series > 0].mean()
+
+def max_positive(series):
+    """Calculates the max of only the positive values."""
+    # Check for empty series to avoid warnings
+    if series[series > 0].empty:
+        return np.nan
+    return series[series > 0].max()
+
+def mean_negative(series):
+    """Calculates the mean of only the negative values."""
+    return series[series < 0].mean()
+
+def min_negative(series):
+    """Calculates the min (most negative value) of only the negative values."""
+    # Check for empty series to avoid warnings
+    if series[series < 0].empty:
+        return np.nan
+    return series[series < 0].min()
+
+# %%
+
+# cp_av_ds_5 : last modified : =>  load_track.py
+
+# --- 2. Apply all functions in one groupby.agg() call ---
+
+# Aggregating acceleration metrics per 'video_id'
+
+# Group by 'video_id' as requested
+acceleration_summary_by_sample = cp_av_ds_5.groupby('video_id').agg(
+                    # Column to aggregate on: 'acceleration_meter_s2'
+                    # New column name   = (Column to use ,          Function to apply)
+                    accel_pos_mean_ms2  = ('acceleration_meter_s2', mean_positive ),
+                    accel_pos_max_ms2   = ('acceleration_meter_s2', max_positive ),
+                    accel_neg_mean_ms2  = ('acceleration_meter_s2', mean_negative ),
+                    accel_neg_min_ms2   = ('acceleration_meter_s2', min_negative )
+).reset_index() # .reset_index() converts 'video_id' from an index to a column.
+
+# %%
+
+acceleration_summary_by_sample[:4]
+    # Out[70]: 
+    #      video_id  accel_pos_mean_ms2  accel_pos_max_ms2  accel_neg_mean_ms2  \
+    # 0  pod_1_ZC04            0.068233           1.260429           -0.066345   
+    # 1  pod_1_ZC05            0.157006           1.555279           -0.146170   
+    # 2  pod_1_ZC06            0.121301           1.045949           -0.115078   
+    # 3  pod_1_ZC07            0.074588           0.568699           -0.076213   
+    
+    #    accel_neg_min_ms2  
+    # 0          -0.791237  
+    # 1          -1.610288  
+    # 2          -0.955969  
+    # 3          -0.662565  
+
+# %%
+
+# pre-check
+df_aggregate_track_6.shape
+    # Out[73]: (103, 23)
+
+# %%
+
+# Perform a left merge
+# 'df_aggregate_track_6' is the left DataFrame (all rows will be kept)
+# 'acceleration_summary_by_sample' is the right DataFrame
+df_aggregate_track_7 = pd.merge(
+                                df_aggregate_track_6, 
+                                acceleration_summary_by_sample, 
+                                on='video_id', 
+                                how='left'
+)
+
+
+# %%
+
+# --- Verify the result ---
+
+df_aggregate_track_7.shape
+    # Out[75]: (103, 27)
+
+# %%
+
+df_aggregate_track_7.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_7.pkl' )
+
 
 # %%
 

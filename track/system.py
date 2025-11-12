@@ -723,6 +723,7 @@ else:
 
 # %%' rename 
 
+# this is not the tracking study, but the transplantation study (both on pigs ! ).
 # rename files, adding-up the figure number : example : Figure_4.svg  =>  Figure_5.svg
 # F:\OneDrive - Uniklinik RWTH Aachen\IT\system__python \ AI__system__python .docx
 
