@@ -40,7 +40,7 @@ cp_av_ds_5 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\
 
 # %%
 
-# -7 : last saved in : all_track .py
+# -7 & 8 : last saved in : all_track .py
 # -6 :last saved in 
     # C:\code\VISION\track\remove_bad_processed.py
 # df_aggregate_track_6 : bad-processed videos are removed.
@@ -48,7 +48,7 @@ cp_av_ds_5 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\
     # df_aggregate_track_5 : last saved in : all_track.py
     # df_aggregate_track_4 : last saved in : roam.py
     # df_aggregate_track_3 : last saved in : position.py
-df_aggregate_track_7 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_7.pkl' )
+df_aggregate_track_8 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_8.pkl' )
 
 
 # %%
@@ -128,24 +128,16 @@ df_cell_count_percentage_2 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aach
 exploration_score = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\exploration_score.pkl' )
 
 # %%
-
-# these tidy dataframes are based oon : df_aggregate_track_6 :  they should be changed to be derived from : df_aggregate_track_7.
-# df_track_tidy_kinematic_3  : the kinematic outlier is also removed  ( remove_bad_processed.py ).
-    # & also the metric : acceleration_mean.
-# bad-processed videos are removed.
-    # df_track_tidy_2
-    # df_track_tidy_roam__2
-    # df_track_tidy_kinematic_2
-# last saved in 
-    # C:\code\VISION\track\remove_bad_processed.py
     
-# continued from : general_track.py
+# continued from : all_track.py
 
-df_track_tidy_2 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_2.pkl' )
+df_track_tidy = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy.pkl' )
 
-df_track_tidy_roam_2 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_roam_2.pkl' )
+df_track_tidy_roam = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_roam.pkl' )
 
-df_track_tidy_kinematic_3 = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_kinematic_3.pkl' )
+df_track_tidy_dv = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_dv.pkl' )
+
+df_track_tidy_acceleration = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_acceleration.pkl' )
 
 # %%
 

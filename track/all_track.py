@@ -1014,7 +1014,7 @@ for video_id in ids_to_check:
 # 1. Define the list of video_ids you want to remove
 ids_to_remove = ['pod_7_ZC66', 'pod_4_ZC20']
 
-# %%
+# %%'
 
 # The '~' operator inverts the boolean mask, so we are KEEPING all rows
 # where the 'video_id' is NOT IN our list.
@@ -1026,7 +1026,7 @@ cp_av_ds_4.shape
 
 cp_av_ds_4.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\cp_av_ds_4.pkl' )
 
-# %%
+# %%'
 
 df_aggregate_track_4.shape
     # Out[69]: (108, 21)
@@ -1038,8 +1038,8 @@ df_aggregate_track_5 = df_aggregate_track_4[ mask_remove_aggregate_df ]
 df_aggregate_track_5.shape
     # Out[70]: (106, 21)
 
-# %%
-# %%
+# %%'
+# %%'
 
 frame_counts = cp_av_ds_4['video_id'].value_counts()
 
@@ -1055,7 +1055,7 @@ frame_counts[:4]
     # pod_7_ZC19    1800
     # # Name: count, dtype: int64
 
-# %%
+# %%'
 
 # Create a new column 'frame_count' in your aggregate DataFrame.
 # The .map() method uses the 'video_id' from each row to look up the
@@ -1063,7 +1063,7 @@ frame_counts[:4]
 # tnf : total number of frames : per video.
 df_aggregate_track_5['tnf'] = df_aggregate_track_5['video_id'].map(frame_counts)
 
-# %%
+# %%'
 
 # velocity_mean_r_ms : 
     # r : ratio : calculated via division of total distance traveled during the whole video / the time of the whole video in 's'.
@@ -1073,7 +1073,7 @@ df_aggregate_track_5['tnf'] = df_aggregate_track_5['video_id'].map(frame_counts)
     # note, the data here is downsampled by factor-10, hence division by 3 in the last part of the line.
 df_aggregate_track_5['velocity_mean_r_ms'] = df_aggregate_track_5['tdt_meter'] / ( df_aggregate_track_5['tnf'] / 3 )
 
-# %% comparison
+# %%' comparison
 
 # comparing the 2 types of velocity estimations.
     # very similar !
@@ -1086,7 +1086,7 @@ df_aggregate_track_5[[ 'velocity_mean_r_ms' , 'velocity_mean' ]][:4]
     # 3            0.045865       0.045941
 
 
-# %% rename a treatment entry
+# %%' rename a treatment entry
 
 rename_map = {
     'DBD-Ecosol': 'DBD-Omnisol'
@@ -1098,12 +1098,12 @@ df_aggregate_track_5['treatment'] = df_aggregate_track_5['treatment'].replace(re
 
 # note : cp_av_ds_4 : does not have any 'treatment' column. Hence, no need for renaming it !
 
-# %%
+# %%'
 
 df_aggregate_track_5.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_5.pkl' )
 
-# %%
-# %% acceleration spitting
+# %%'
+# %%' acceleration spitting
 
 # as in a bound area, positive & negaive accelerations balance each-other  : mean of the acceleration is almost 0.
     # the proper way of evaluating acceleration is dividing it to '+' & '-' values.
@@ -1132,7 +1132,7 @@ def min_negative(series):
         return np.nan
     return series[series < 0].min()
 
-# %%
+# %%'
 
 # cp_av_ds_5 : last modified : =>  load_track.py
 
@@ -1150,7 +1150,7 @@ acceleration_summary_by_sample = cp_av_ds_5.groupby('video_id').agg(
                     accel_neg_min_ms2   = ('acceleration_meter_s2', min_negative )
 ).reset_index() # .reset_index() converts 'video_id' from an index to a column.
 
-# %%
+# %%'
 
 acceleration_summary_by_sample[:4]
     # Out[70]: 
@@ -1166,13 +1166,13 @@ acceleration_summary_by_sample[:4]
     # 2          -0.955969  
     # 3          -0.662565  
 
-# %%
+# %%'
 
 # pre-check
 df_aggregate_track_6.shape
     # Out[73]: (103, 23)
 
-# %%
+# %%'
 
 # Perform a left merge
 # 'df_aggregate_track_6' is the left DataFrame (all rows will be kept)
@@ -1185,19 +1185,347 @@ df_aggregate_track_7 = pd.merge(
 )
 
 
-# %%
+# %%'
 
 # --- Verify the result ---
 
 df_aggregate_track_7.shape
     # Out[75]: (103, 27)
 
+list( df_aggregate_track_7.columns )
+    # Out[11]: 
+    # ['time',
+    #  'sample_ID',
+    #  'tdt_pixel',
+    #  'file_name',
+    #  'sample_png_height',
+    #  'tdt_meter',
+    #  'treatment',
+    #  'video_id',
+    #  'inner_zone_percentage',
+    #  'velocity_mean',
+    #  'velocity_max',
+    #  'acceleration_mean',
+    #  'acceleration_max',
+    #  'nocw',
+    #  'pocw',
+    #  'shannon_entropy',
+    #  'max_entropy',
+    #  'uniformity_index',
+    #  'inner_roi',
+    #  'outer_roi',
+    #  'bbox_roi',
+    #  'tnf',
+    #  'velocity_mean_r_ms',
+    #  'accel_pos_mean_ms2',
+    #  'accel_pos_max_ms2',
+    #  'accel_neg_mean_ms2',
+    #  'accel_neg_min_ms2']
+
+# the old velocity calculations are not needed.
+df_aggregate_track_7.drop( columns=[ 'acceleration_mean' , 'acceleration_max' ] , inplace=True )
+
+# %% remove the 4th bad-processed video.
+
+# the 3 main bad-processed videos are already removed from this video ( remove_bad_processed.py ).
+# however, the one remaining with jittering bounding-box size, that makes trouble in maximum velocity & maxium acceleration has not been removed.
+    # here, this video is removed :
+
+mask_keep = df_aggregate_track_7['video_id'] != 'pod_3_ZC22'
+df_aggregate_track_8 = df_aggregate_track_7[ mask_keep ]
+df_aggregate_track_8.shape
+    # Out[16]: (102, 25)
+
+# %%'
+
+df_aggregate_track_8.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_8.pkl' )
+
+
+# %%'
+# %%' tidy
+
+# tidy format.
+
+# %%'
+
+# List of the identifier and grouping columns you want to keep
+id_columns = ['video_id', 'sample_ID', 'time', 'treatment']
+
+# List of the measurement columns you want to analyze
+readout_parameters = [
+                        'tdt_meter', 
+                        'velocity_mean', 
+                        'velocity_mean_r_ms' ,
+                        'velocity_max',
+                        
+                        'accel_pos_mean_ms2',
+                        'accel_pos_max_ms2',
+                        'accel_neg_mean_ms2',
+                        'accel_neg_min_ms2' ,
+                         
+                        'inner_zone_percentage',
+                        'nocw',  # Note: I removed the extra space from your column name list
+                        'uniformity_index'
+]
+
+# Create the new, focused DataFrame
+df_subset = df_aggregate_track_8[ id_columns + readout_parameters ]
+
+# %%'
+
+# Melt the DataFrame to convert it to a long format
+df_track_tidy = pd.melt(
+                        df_subset,
+                        id_vars=id_columns,              # Columns to keep as they are (identifiers)
+                        value_vars=readout_parameters,   # Columns to "unpivot" into rows
+                        var_name='metric',               # Name of the new column for the measurement type
+                        value_name='value'               # Name of the new column for the measurement value
+)
+
+# %%'
+
+df_track_tidy.shape
+    # Out[12]: (1122, 6)
+
+df_track_tidy.columns
+    # Out[13]: Index(['video_id', 'sample_ID', 'time', 'treatment', 'metric', 'value'], dtype='object')
+
+df_track_tidy[:4]
+    # Out[14]: 
+    #      video_id sample_ID   time    treatment     metric     value
+    # 0  pod_1_ZC04      ZC04  pod_1      DBD-HTK  tdt_meter 29.903323
+    # 1  pod_1_ZC05      ZC05  pod_1  DBD-Omnisol  tdt_meter 82.941499
+    # 2  pod_1_ZC06      ZC06  pod_1      DBD-HTK  tdt_meter 57.402014
+    # 3  pod_1_ZC07      ZC07  pod_1  DBD-Omnisol  tdt_meter 27.518746
+
+# %%' rename
+
+# # Create a dictionary to define the mapping
+# rename_map = {
+#     'DBD-Ecosol': 'DBD-Omnisol'
+# }
+
+# # Apply the replacement to the 'treatment' column
+# # This finds 'DBD-Ecosol' and replaces it with 'DBD-Omnisol'
+# df_track_tidy['treatment'] = df_track_tidy['treatment'].replace(rename_map)
+#     # c:\code\vision\track\general_track.py:65: FutureWarning: 
+#     #     The behavior of Series.replace (and DataFrame.replace) with CategoricalDtype is deprecated. 
+#     #     In a future version, replace will only be used for cases that preserve the categories. 
+#     #     To change the categories, use ser.cat.rename_categories instead.
+#     #   df_track_tidy['treatment'] = df_track_tidy['treatment'].replace(rename_map)
+
+# %%'
+# %%'
+
+df_track_tidy['treatment'].unique()
+    # Out[15]: 
+    # ['DBD-HTK', 'DBD-Omnisol', 'DCD-HTK', 'NMP']
+    # Categories (4, object): ['DBD-HTK' < 'DBD-Omnisol' < 'DCD-HTK' < 'NMP']
+
+# %%'
+
+list( df_track_tidy['metric'].unique() )
+    # Out[17]: 
+    # ['tdt_meter',
+    #  'velocity_mean',
+    #  'velocity_mean_r_ms',
+    #  'velocity_max',
+    #  'accel_pos_mean_ms2',
+    #  'accel_pos_max_ms2',
+    #  'accel_neg_mean_ms2',
+    #  'accel_neg_min_ms2',
+    #  'inner_zone_percentage',
+    #  'nocw',
+    #  'uniformity_index']
+
+
+# %%' split the dataframe.
+
+# this is to make them ready for creating separate figures.
+    # each figure with subplots corresponding to the selected metrics.
+
+# %%' roam
+
+# List of metrics for the "roaming" DataFrame
+roaming_metrics = [
+                    'inner_zone_percentage', 
+                    'nocw', 
+                    'uniformity_index'
+]
+
+mask_roam = df_track_tidy['metric'].isin(roaming_metrics)
+df_track_tidy_roam = df_track_tidy[ mask_roam ].copy()
+
+df_track_tidy_roam.shape
+    # Out[19]: (306, 6)
+
+# %% kinematic
+# %%' distance & velocity kinematic
+
+# List of metrics for the "kinematic" DataFrame
+# (This is all remaining metrics except 'velocity_mean')
+# dv : distance & velocity
+dv_metrics = [
+                    'tdt_meter',
+                    'velocity_mean_r_ms',
+                    'velocity_max'
+]
+
+mask_dv = df_track_tidy['metric'].isin( dv_metrics )
+df_track_tidy_dv = df_track_tidy[ mask_dv ].copy()
+
+df_track_tidy_dv.shape
+    # Out[21]: (306, 6)
+
+# %% acceleration
+
+acceleration_metrics = [
+             'accel_pos_mean_ms2',
+             'accel_pos_max_ms2',
+             'accel_neg_mean_ms2',
+             'accel_neg_min_ms2'
+]
+
+mask_acceleration = df_track_tidy['metric'].isin( acceleration_metrics )
+df_track_tidy_acceleration = df_track_tidy[ mask_acceleration ].copy()
+
+df_track_tidy_acceleration.shape
+    # Out[22]: (408, 6)
+
+
+# %%'
+
+df_track_tidy_roam['metric'].unique()
+    # Out[16]: ]array(['inner_zone_percentage', 'nocw', 'uniformity_index'], dtype=object)
+
+df_track_tidy_kinematic['metric'].unique()
+    # Out[17]: 
+    # array(['tdt_meter', 'velocity_mean_r_ms', 'velocity_max',
+    #        'acceleration_mean', 'acceleration_max'], dtype=object)
+
+# %%' order _ roam
+
+roaming_metrics = [
+                    'inner_zone_percentage', 
+                    'nocw', 
+                    'uniformity_index'
+]
+
+df_track_tidy_roam['metric'] = pd.Categorical(
+                                        df_track_tidy_roam['metric'],
+                                        categories= roaming_metrics,
+                                        ordered=True
+)
+
+
+df_track_tidy_roam['metric'].unique()
+    # Out[23]: 
+    # ['inner_zone_percentage', 'nocw', 'uniformity_index']
+    # Categories (3, object): ['inner_zone_percentage' < 'nocw' < 'uniformity_index']
+
+# %%' order _ dv
+
+dv_metrics = [
+                    'velocity_mean_r_ms',
+                    'velocity_max',
+                    'tdt_meter'
+]
+
+df_track_tidy_dv['metric'] = pd.Categorical(
+                                        df_track_tidy_dv['metric'],
+                                        categories= dv_metrics ,
+                                        ordered=True
+)
+
+
+df_track_tidy_dv['metric'].unique()
+    # Out[24]: 
+    # ['tdt_meter', 'velocity_mean_r_ms', 'velocity_max']
+    # Categories (3, object): ['velocity_mean_r_ms' < 'velocity_max' < 'tdt_meter']
+
+# %% order _ acceleration
+
+acceleration_metrics = [
+                         'accel_pos_mean_ms2',
+                         'accel_pos_max_ms2',
+                         'accel_neg_mean_ms2',
+                         'accel_neg_min_ms2'
+]
+
+df_track_tidy_acceleration['metric'] = pd.Categorical(
+                                        df_track_tidy_acceleration['metric'],
+                                        categories= acceleration_metrics ,
+                                        ordered=True
+)
+
+
+df_track_tidy_acceleration['metric'].unique()
+    # Out[25]: 
+    # ['accel_pos_mean_ms2', 'accel_pos_max_ms2', 'accel_neg_mean_ms2', 'accel_neg_min_ms2']
+    # Categories (4, object): ['accel_pos_mean_ms2' < 'accel_pos_max_ms2' < 'accel_neg_mean_ms2' <
+    #                          'accel_neg_min_ms2']
+
+# %%'
+
+# the categorixal order of 'treatment' is intact.
+
+df_track_tidy_roam['treatment'].unique()
+    # Out[26]: 
+    # ['DBD-HTK', 'DBD-Omnisol', 'DCD-HTK', 'NMP']
+    # Categories (4, object): ['DBD-HTK' < 'DBD-Omnisol' < 'DCD-HTK' < 'NMP']
+
+df_track_tidy_dv['treatment'].unique()
+    # Out[27]: 
+    # ['DBD-HTK', 'DBD-Omnisol', 'DCD-HTK', 'NMP']
+    # Categories (4, object): ['DBD-HTK' < 'DBD-Omnisol' < 'DCD-HTK' < 'NMP']
+
+df_track_tidy_acceleration['treatment'].unique()
+    # Out[28]: 
+    # ['DBD-HTK', 'DBD-Omnisol', 'DCD-HTK', 'NMP']
+    # Categories (4, object): ['DBD-HTK' < 'DBD-Omnisol' < 'DCD-HTK' < 'NMP']
+
+# %%' save
+
+df_track_tidy.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy.pkl' )
+
+df_track_tidy_roam.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_roam.pkl' )
+
+df_track_tidy_dv.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_dv.pkl' )
+
+df_track_tidy_acceleration.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_acceleration.pkl' )
+
+# %%' mixed-effects model
+
+# preparing the data for the  mixed-effects model analysis.
+
+# the time column is already ordered.
+df_track_tidy['time'].unique()
+    # Out[39]: 
+    # ['pod_1', 'pod_3', 'pod_4', 'pod_7', 'retrain_2']
+    # Categories (5, object): ['retrain_2' < 'pod_1' < 'pod_3' < 'pod_4' < 'pod_7']
+
 # %%
 
-df_aggregate_track_7.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_aggregate_track_7.pkl' )
+df_track_tidy.shape
+    # Out[42]: (1122, 6)
+
+# 1. Drop any row where 'sample_ID' is missing (NaN)
+df_track_tidy_remove_NaN = df_track_tidy.dropna( subset=['value'] )
+
+df_track_tidy_remove_NaN.shape
+    # Out[43]: (1119, 6)
+
+# %% rename back
+
+df_track_tidy_remove_NaN_rename_back = df_track_tidy_remove_NaN.copy()
+
+rename_back_map = {
+    'DBD-Omnisol': 'DBD-Ecosol'
+}
+
+# Apply the replacement to the 'treatment' column
+df_track_tidy_remove_NaN_rename_back['treatment'] = df_track_tidy_remove_NaN['treatment'].replace(rename_back_map)
 
 
 # %%
-
-
 

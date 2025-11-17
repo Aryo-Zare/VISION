@@ -15,9 +15,9 @@ custom_palette = {
 
 # Create a FacetGrid where each facet corresponds to a specific metric
 g = sns.FacetGrid( 
-                    df_track_tidy_roam , 
+                    df_track_tidy_acceleration , 
                     col="metric", 
-                    col_wrap=1, 
+                    col_wrap=2, 
                     sharex=False , 
                     sharey=False ,  # this value is True by default !! : change it to False !!
                     height=6, 
@@ -81,9 +81,10 @@ g.axes.flat[-1].set_xlabel("Time" , loc='right' , fontsize=24 )
     # first check the plot without running this cell to make sure each plot corresponds to your desired order-title.
 
 new_titles = [ 
-                    'Percent time animal resided in the inner-zone', 
-                    'Percentage of total number of grid-cells walked', 
-                    'Uniformity index'
+                'Average positive acceleration',
+                'Maximum positive acceleration',
+                'Average negative acceleration',
+                'Maximum negative acceleration'
             ]
 
 for ax , i in zip( g.axes.flat , new_titles ):
@@ -91,7 +92,12 @@ for ax , i in zip( g.axes.flat , new_titles ):
 
 # %%'
 
-unit = [ '% time' , '% grid-cells' , '' ]
+unit = [
+        r'$\frac{m}{s^2}$',      # Acceleration (stacked fraction)
+        r'$\frac{m}{s^2}$',    
+        r'$\frac{m}{s^2}$',      
+        r'$\frac{m}{s^2}$',  
+]
 
 for ax , i in zip( g.axes.flat , unit ) :
     ax.set_ylabel( i , loc='top' , fontsize=20 )
@@ -99,7 +105,7 @@ for ax , i in zip( g.axes.flat , unit ) :
 # %%'
 
 # x= : the x location of the text in figure coordinates.
-plt.suptitle( 'Roaming behavior of animal in the open-field' , x=0.4 , fontsize=24 )
+plt.suptitle( 'Positive & negative acceleration in open-field' , x=0.4 , fontsize=24 )
 
 # %% add subplot indexing letters
 
@@ -135,14 +141,14 @@ for ax, letter in zip(g.axes.flatten(), letters):
 # %%'
 
 # rect : to avoid overlapping of the legend on the figure.
-plt.tight_layout( rect=[0, 0, 0.82 , 1] )
+plt.tight_layout( rect=[0, 0, 0.85 , 1] )
 
 # %%'
 
 # bc : baseline corrected
 
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\roam_3.pdf' )
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\roam_3.svg' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\acceleration\acceleration.pdf' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\acceleration\acceleration.svg' )
 
 # %%'
 

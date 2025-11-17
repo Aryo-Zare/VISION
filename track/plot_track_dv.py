@@ -15,7 +15,7 @@ custom_palette = {
 
 # Create a FacetGrid where each facet corresponds to a specific metric
 g = sns.FacetGrid( 
-                    df_track_tidy_roam , 
+                    df_track_tidy_dv , 
                     col="metric", 
                     col_wrap=1, 
                     sharex=False , 
@@ -81,9 +81,9 @@ g.axes.flat[-1].set_xlabel("Time" , loc='right' , fontsize=24 )
     # first check the plot without running this cell to make sure each plot corresponds to your desired order-title.
 
 new_titles = [ 
-                    'Percent time animal resided in the inner-zone', 
-                    'Percentage of total number of grid-cells walked', 
-                    'Uniformity index'
+                'Average velocity',
+                'Maximum velocity',
+                'Total distance walked'
             ]
 
 for ax , i in zip( g.axes.flat , new_titles ):
@@ -91,7 +91,11 @@ for ax , i in zip( g.axes.flat , new_titles ):
 
 # %%'
 
-unit = [ '% time' , '% grid-cells' , '' ]
+unit = [ 
+        '$m/s$',                 # Velocity
+        '$m/s$',                 # Velocity
+        '$m$'                    # Distance
+        ]
 
 for ax , i in zip( g.axes.flat , unit ) :
     ax.set_ylabel( i , loc='top' , fontsize=20 )
@@ -99,7 +103,7 @@ for ax , i in zip( g.axes.flat , unit ) :
 # %%'
 
 # x= : the x location of the text in figure coordinates.
-plt.suptitle( 'Roaming behavior of animal in the open-field' , x=0.4 , fontsize=24 )
+plt.suptitle( 'Velocity and distance walked in the open-field' , x=0.4 , fontsize=24 )
 
 # %% add subplot indexing letters
 
@@ -141,8 +145,8 @@ plt.tight_layout( rect=[0, 0, 0.82 , 1] )
 
 # bc : baseline corrected
 
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\roam_3.pdf' )
-plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\roam\roam_3.svg' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\dv\dv.pdf' )
+plt.savefig( r'F:\OneDrive - Uniklinik RWTH Aachen\vision\track\plot\dv\dv.svg' )
 
 # %%'
 

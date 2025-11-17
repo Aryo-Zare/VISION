@@ -101,6 +101,8 @@ df_track_tidy_kinematic_2.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISIO
 # %%
 # %%
 
+# removing an outlier specific to : 
+
 df_track_tidy_kinematic_2.shape
     # Out[51]: (515, 6)
 
