@@ -1494,6 +1494,10 @@ df_track_tidy_dv.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\d
 
 df_track_tidy_acceleration.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_acceleration.pkl' )
 
+# %% load
+
+df_track_tidy = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy.pkl' )
+
 # %%' mixed-effects model
 
 # preparing the data for the  mixed-effects model analysis.
@@ -1504,7 +1508,7 @@ df_track_tidy['time'].unique()
     # ['pod_1', 'pod_3', 'pod_4', 'pod_7', 'retrain_2']
     # Categories (5, object): ['retrain_2' < 'pod_1' < 'pod_3' < 'pod_4' < 'pod_7']
 
-# %%
+# %%'
 
 df_track_tidy.shape
     # Out[42]: (1122, 6)
@@ -1526,6 +1530,113 @@ rename_back_map = {
 # Apply the replacement to the 'treatment' column
 df_track_tidy_remove_NaN_rename_back['treatment'] = df_track_tidy_remove_NaN['treatment'].replace(rename_back_map)
 
+# %%'
+
+df_track_tidy_remove_NaN_rename_back[:4]
+    # Out[10]: 
+    #      video_id sample_ID   time   treatment     metric      value
+    # 0  pod_1_ZC04      ZC04  pod_1     DBD-HTK  tdt_meter  29.903323
+    # 1  pod_1_ZC05      ZC05  pod_1  DBD-Ecosol  tdt_meter  82.941499
+    # 2  pod_1_ZC06      ZC06  pod_1     DBD-HTK  tdt_meter  57.402014
+    # 3  pod_1_ZC07      ZC07  pod_1  DBD-Ecosol  tdt_meter  27.518746
+
+# %%'
+
+df_track_tidy_remove_NaN_rename_back.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_remove_NaN_rename_back.pkl' )
+
+# %%'
+# %%'
+# %%' yjt
+
+# Yeo-Johnson transformation , separate for each metric.
+# from sklearn.preprocessing import PowerTransformer
+
+df = df_track_tidy_remove_NaN_rename_back.copy()
+
+df["value_yjt"] = np.nan  # initialize column
+
+for met in df["metric"].unique():
+    idx = df["metric"] == met   #  masking index
+    values = df.loc[idx, "value"].values.reshape(-1, 1)
+
+    pt = PowerTransformer(method="yeo-johnson", standardize=False)
+    transformed = pt.fit_transform(values)
+
+    df.loc[idx, "value_yjt"] = transformed.flatten()
 
 # %%
+
+df_track_tidy_remove_NaN_rename_back["value_yjt"] = df["value_yjt"]
+
+df_track_tidy_remove_NaN_rename_back.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_remove_NaN_rename_back.pkl' )
+
+
+# %%
+
+
+df.groupby("metric")[ 'value' ].describe()
+    # Out[65]: 
+    #                            count      mean       std       min       25%  \
+    # metric                                                                     
+    # accel_neg_mean_ms2    102.000000 -0.141530  0.063342 -0.477355 -0.166142   
+    # accel_neg_min_ms2     102.000000 -1.793011  0.893730 -5.478501 -2.357411   
+    # accel_pos_max_ms2     102.000000  1.883353  0.886270  0.568699  1.251439   
+    # accel_pos_mean_ms2    102.000000  0.153234  0.069975  0.029021  0.111301   
+    # inner_zone_percentage  99.000000 20.498182 15.902554  0.440000  9.170000   
+    # nocw                  102.000000 71.323529 18.115778 14.000000 63.250000   
+    # tdt_meter             102.000000 66.841603 36.068883  8.156513 46.675913   
+    # uniformity_index      102.000000  0.780591  0.108102  0.146816  0.755712   
+    # velocity_max          102.000000  1.343577  0.594923  0.416664  0.905302   
+    # velocity_mean         102.000000  0.111564  0.060196  0.013609  0.077891   
+    # velocity_mean_r_ms    102.000000  0.111427  0.060123  0.013594  0.077804   
+    
+    #                             50%       75%        max  
+    # metric                                                
+    # accel_neg_mean_ms2    -0.132673 -0.106754  -0.026065  
+    # accel_neg_min_ms2     -1.579624 -1.155073  -0.651349  
+    # accel_pos_max_ms2      1.600231  2.430844   4.433050  
+    # accel_pos_mean_ms2     0.144667  0.184537   0.503716  
+    # inner_zone_percentage 17.070000 28.085000  77.610000  
+    # nocw                  75.000000 83.000000  96.000000  
+    # tdt_meter             60.539106 81.753953 239.051215  
+    # uniformity_index       0.805021  0.833940   0.922784  
+    # velocity_max           1.164709  1.724112   3.147192  
+    # velocity_mean          0.101039  0.136427   0.398862  
+    # velocity_mean_r_ms     0.100899  0.136275   0.398419  
+
+df.groupby("metric")["value_yjt"].describe()
+    # Out[66]: 
+    #                            count        mean         std        min  \
+    # metric                                                                
+    # accel_neg_mean_ms2    102.000000   -0.092686    0.025660  -0.171558   
+    # accel_neg_min_ms2     102.000000   -0.655469    0.123686  -0.945530   
+    # accel_pos_max_ms2     102.000000    0.717916    0.140334   0.387307   
+    # accel_pos_mean_ms2    102.000000    0.099200    0.027996   0.026767   
+    # inner_zone_percentage  99.000000    4.315029    1.676639   0.383044   
+    # nocw                  102.000000 9952.504668 4470.224569 233.978623   
+    # tdt_meter             102.000000   10.206797    2.665292   3.503967   
+    # uniformity_index      102.000000   86.693095   34.082018   0.341245   
+    # velocity_max          102.000000    0.576839    0.115442   0.300806   
+    # velocity_mean         102.000000    0.074674    0.026467   0.013008   
+    # velocity_mean_r_ms    102.000000    0.074585    0.026436   0.012993   
+    
+    #                               25%          50%          75%          max  
+    # metric                                                                    
+    # accel_neg_mean_ms2      -0.107250    -0.092715    -0.079555    -0.024144  
+    # accel_neg_min_ms2       -0.761686    -0.654579    -0.566693    -0.409734  
+    # accel_pos_max_ms2        0.622213     0.700766     0.831730     1.000860  
+    # accel_pos_mean_ms2       0.083190     0.100004     0.116757     0.181433  
+    # inner_zone_percentage    3.215481     4.372092     5.473950     8.283815  
+    # nocw                  6920.481249 10229.334172 12912.075334 18047.639791  
+    # tdt_meter                8.944468    10.141297    11.686826    18.965284  
+    # uniformity_index        64.112039    88.867651   107.176034   187.140917  
+    # velocity_max             0.494355     0.563625     0.670643     0.819004  
+    # velocity_mean            0.060983     0.074007     0.090687     0.149137  
+    # velocity_mean_r_ms       0.060915     0.073910     0.090586     0.148965  
+
+
+# %%'
+
+
+
 

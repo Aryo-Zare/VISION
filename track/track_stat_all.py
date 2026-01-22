@@ -1,5 +1,14 @@
 
-# %%
+
+# %% address
+
+# F:\OneDrive - Uniklinik RWTH Aachen\kidney \ AI_stat .docx    |   414
+
+
+# Name                     Version          Build            Channel
+# statsmodels              0.14.5           py313h2cb717b_0  anaconda
+
+# %% packages
 
 import os
 import numpy as np
@@ -9,16 +18,30 @@ import statsmodels.api as sm
 from statsmodels.stats.multitest import multipletests
 import matplotlib.pyplot as plt
 
-# %%
+# %% input
 
 # --- Input data ---
+
+# C:\code\VISION\track\all_track.py     =>
+df_track_tidy_remove_NaN_rename_back = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_remove_NaN_rename_back.pkl' )
+
+# %% input
+
 data_main = df_track_tidy_remove_NaN_rename_back   # your dataframe
-outcome_variable = "value"
+outcome_variable = "value_yjt"
+# "value"
 
 # Ordered categories
 treatments = ["DBD-HTK", "DBD-Ecosol", "DCD-HTK", "NMP"]
 time_points = ["retrain_2", "pod_1", "pod_3", "pod_4", "pod_7"]
 reference_time = "retrain_2"
+
+# %% qq address
+
+# Define the folder for saving Q-Q plots
+qq_plot_folder = r"F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\stat\qq"
+if not os.path.exists(qq_plot_folder):
+    os.makedirs(qq_plot_folder)
 
 # %% helper functions
 
@@ -93,7 +116,7 @@ def build_time_contrast(treatment, timeA, timeB, params_list, result, reference_
 
     return contrastA - contrastB
 
-# %%
+# %% Main loop
 
 # --- Main loop ---
 results_all = []
@@ -108,6 +131,27 @@ for met in data_main['metric'].unique():
     except Exception as e:
         print(f"Model did not converge for metric {met}: {e}")
         continue
+
+    #======================
+    # qq-plot
+    
+    # Generate and save the Q-Q plot for model residuals.
+    # for each metric, there is one residuals data  =>  1 q-q plot.
+    fig = sm.qqplot(result_metric.resid, line='45')
+    # Set the overall figure size to 8 x 8 inches
+    fig.set_size_inches(8, 8)
+    # Get the first (and typically only) axes object from the figure
+    ax = fig.axes[0]
+    # Set aspect ratio to 'equal' so that one unit on the x-axis
+    # is equal in length to one unit on the y-axis.
+    ax.set_aspect('equal', adjustable='box')
+    plt.title(f"Q-Q Plot for {met}")
+    plot_filename = os.path.join(qq_plot_folder, f"qqplot_{met}.pdf")
+    plt.tight_layout()
+    plt.savefig(plot_filename)
+    plt.close()
+    
+    #======================
 
     params_list_metric = result_metric.params.index.tolist()
     results_metric = []
@@ -172,15 +216,14 @@ for met in data_main['metric'].unique():
 # --- Final concatenated results ---
 final_results_df = pd.concat(results_all, axis=0).reset_index(drop=True)
 
-# %%
-
+# %% result
 
 final_results_df.shape
-    # Out[73]: (605, 11)
-
+    # Out[73]: (605, 11)  #  value
+    # Out[24]: (605, 11)  #  value_yjt
 
 # Save
-final_results_df.to_excel(r"F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\stat\track_stat_complete.xlsx", index=False)
+final_results_df.to_excel(r"F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\stat\track_stat_complete_value_yjt.xlsx", index=False)
 
-# %%
+# %%'
 
