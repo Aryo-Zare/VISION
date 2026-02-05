@@ -1,5 +1,13 @@
 
 
+# %%
+
+'''
+    this program evaluates the statistical significance for :
+        between 'treatment' groups.
+        between 'time' points.
+'''
+
 # %% address
 
 # F:\OneDrive - Uniklinik RWTH Aachen\kidney \ AI_stat .docx    |   414

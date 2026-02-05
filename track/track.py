@@ -2,7 +2,6 @@
 
 # %%'
 
-
 point_1 = pd.read_csv( r'U:\VISION\track\data\P067_ZC60_OF2ReTr_Video_1_04_06_2023_11_35_42_1\center_points.csv' )
 
 point_2 = pd.read_csv( r'U:\VISION\track\data\P067_ZC61_OF2ReTr_Video_1_28_06_2023_11_01_15_1\center_points.csv' )

@@ -1498,6 +1498,13 @@ df_track_tidy_acceleration.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISI
 
 df_track_tidy = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy.pkl' )
 
+df_track_tidy_roam = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_roam.pkl' )
+
+df_track_tidy_dv = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_dv.pkl' )
+
+df_track_tidy_acceleration = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_acceleration.pkl' )
+
+
 # %%' mixed-effects model
 
 # preparing the data for the  mixed-effects model analysis.
@@ -1564,14 +1571,14 @@ for met in df["metric"].unique():
 
     df.loc[idx, "value_yjt"] = transformed.flatten()
 
-# %%
+# %%'
 
 df_track_tidy_remove_NaN_rename_back["value_yjt"] = df["value_yjt"]
 
 df_track_tidy_remove_NaN_rename_back.to_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_remove_NaN_rename_back.pkl' )
 
 
-# %%
+# %%'
 
 
 df.groupby("metric")[ 'value' ].describe()
@@ -1635,8 +1642,82 @@ df.groupby("metric")["value_yjt"].describe()
     # velocity_mean_r_ms       0.060915     0.073910     0.090586     0.148965  
 
 
+# %% descriptive
+
+df_track_tidy_roam['sample_ID'].nunique()
+# Out[13]: 25
+
+df_track_tidy_roam['metric'].value_counts()
+    # Out[14]: 
+    # metric
+    # inner_zone_percentage    102
+    # nocw                     102
+    # uniformity_index         102
+    # Name: count, dtype: int64
+
+
+# this is probably because of different time-points per group.
+df_track_tidy_roam['treatment'].value_counts()
+    # Out[15]: 
+    # treatment
+    # NMP            105
+    # DBD-Omnisol     87
+    # DCD-HTK         60
+    # DBD-HTK         54
+    # Name: count, dtype: int64
+
+
+
+df_track_tidy_roam.groupby('treatment')['sample_ID'].nunique()
+    # C:\Users\azare\AppData\Local\Temp\ipykernel_40508\2795833093.py:1: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+    #   df_track_tidy_roam.groupby('treatment')['sample_ID'].nunique()
+    # Out[16]: 
+    # treatment
+    # DBD-HTK         4
+    # DBD-Omnisol     6
+    # DCD-HTK         5
+    # NMP            10
+    # Name: sample_ID, dtype: int64
+
+df_track_tidy_roam.groupby('treatment', observed=True)['sample_ID'].nunique()
+    # Out[17]: 
+    # treatment
+    # DBD-HTK         4
+    # DBD-Omnisol     6
+    # DCD-HTK         5
+    # NMP            10
+    # Name: sample_ID, dtype: int64
+
+# %%% separate
+
+df_track_tidy_roam.groupby('treatment', observed=True)['sample_ID'].nunique()
+    # Out[19]: 
+    # treatment
+    # DBD-HTK         4
+    # DBD-Omnisol     6
+    # DCD-HTK         5
+    # NMP            10
+    # Name: sample_ID, dtype: int64
+
+
+df_track_tidy_dv.groupby('treatment', observed=True)['sample_ID'].nunique()
+    # Out[22]: 
+    # treatment
+    # DBD-HTK         4
+    # DBD-Omnisol     6
+    # DCD-HTK         5
+    # NMP            10
+    # Name: sample_ID, dtype: int64
+
+df_track_tidy_acceleration.groupby('treatment', observed=True)['sample_ID'].nunique()
+    # Out[24]: 
+    # treatment
+    # DBD-HTK         4
+    # DBD-Omnisol     6
+    # DCD-HTK         5
+    # NMP            10
+    # Name: sample_ID, dtype: int64
+
 # %%'
-
-
 
 
