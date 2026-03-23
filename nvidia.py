@@ -96,3 +96,13 @@ print(f"Free Memory: {memory_info.free / (1024 ** 2):.2f} MB")
     # Free Memory: 7973.00 MB
 
 # %%
+
+import torch
+
+torch.cuda.is_available()
+    # Out[2]: True
+
+
+# %%
+
+
