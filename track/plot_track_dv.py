@@ -2,6 +2,12 @@
 
 # %%
 
+# C:\code\VISION\track\all_track.py
+df_track_tidy_dv = pd.read_pickle( r'F:\OneDrive - Uniklinik RWTH Aachen\VISION\track\data\df_track_tidy_dv.pkl' )
+
+
+# %%
+
 # Define a custom palette for the hue levels in the desired order
 custom_palette = { 
                     "DBD-HTK": "green", 
