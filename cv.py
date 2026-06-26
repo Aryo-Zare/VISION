@@ -1,6 +1,6 @@
 
 
-# %%
+# %%'
 
 # import cv2 as cv
 img = cv2.imread(r"U:\\steps.jpg")
@@ -8,7 +8,7 @@ img = cv2.imread(r"U:\\steps.jpg")
 cv2.imshow("Display window", img)
 k = cv2.waitKey(0) # Wait for a keystroke in the window
 
-# %%
+# %%'
 
 # Specify the path to your PNG image
 image_path = r'U:\VISION\track\data\P067_ZC60_OF2ReTr_Video_1_04_06_2023_11_35_42_1\first_frame.png'
@@ -19,7 +19,7 @@ img = cv2.imread(image_path)
 img.shape
     # Out[10]: (960, 1280, 3)
 
-# %%
+# %%'
 
 # Verify that the image has been loaded successfully
 # if img is None:
@@ -32,12 +32,12 @@ img.shape
 #     print(f"Image dimensions:\nWidth: {width}px\nHeight: {height}px\nChannels: {channels}")
 
 
-# %%
+# %%'
 
 import cv2, os
 from pathlib import Path
 
-# %%
+# %%'
 
 # Configuration
 SRC_DIR  = Path(r"U:\home_cage\notocord _ tse\2025-7-15")
@@ -88,7 +88,7 @@ def batch_compress_folder(src_folder: Path, out_folder: Path):
 if __name__ == "__main__":
     batch_compress_folder(SRC_DIR, OUT_DIR)
 
-# %%
+# %%'
 
 '''
         
@@ -113,5 +113,87 @@ if __name__ == "__main__":
 
 '''
 
-# %%
+# %% crop
+
+# e_10
+
+import os
+import cv2
+
+image_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\test__zc_19_2__.png'
+# r'D:\PAS_kidney_pig\test\test__zc_19_2__.png'
+img = cv2.imread(image_path)
+
+
+# Crop 1024x1024 from top-left
+cropped = img[:1024, :1024]   # This is equivalent and cleaner
+
+output_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\test__zc_19_2__cropped.png'
+#r"D:\PAS_kidney_pig\test\test__zc_19_2__cropped.png"
+cv2.imwrite(output_path, cropped)
+    
+    
+# %% pre-process
+
+# e_10
+# enhancement
+
+# import cv2
+# import os
+
+# %%% load
+
+
+# 1. Setup paths using raw strings for Windows
+INPUT_PATH = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\test__zc_19_2__cropped.png'
+#   r"D:\PAS_kidney_pig\test\test__zc_19_2__cropped.png"
+
+
+# Create an output directory if it doesn't exist
+OUTPUT_DIR = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\saturation'      
+#  r"D:\PAS_kidney_pig\test"
+# os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# Define where to save the enhanced image
+OUTPUT_PATH = os.path.join(OUTPUT_DIR, "test__zc_19_2__sat_6_.png")
+
+# 2. Load the raw PNG screenshot natively in OpenCV
+image_bgr = cv2.imread(INPUT_PATH)
+
+# %%% contrast _ brightness
+
+
+# 3. Apply the 2.0x Contrast Enhancement
+# the higher 'alpha' or 'beta', the birghter & more invisible gets the image.
+alpha = 1.5  # Contrast control (1.0-3.0)
+beta = 0     # Brightness control (0-100)
+image_high_contrast = cv2.convertScaleAbs(image_bgr, alpha=alpha, beta=beta)
+
+
+
+# %%% saturation
+
+# enhancing only the saturation.
+# cell-217
+
+# The biologically-aware way to enhance PAS stains in OpenCV
+hsv = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2HSV)
+h, s, v = cv2.split(hsv)
+
+# Boost the saturation (the "pinkness") * alpha ( alpha times ) without changing the brightness.
+s = cv2.convertScaleAbs(s, alpha=6, beta=0)
+
+enhanced_hsv = cv2.merge((h, s, v))
+enhanced_image_bgr = cv2.cvtColor(enhanced_hsv, cv2.COLOR_HSV2BGR)
+
+# %%% save
+
+# 4. Save to Disk
+cv2.imwrite(OUTPUT_PATH, image_high_contrast)
+
+# 4. Save to Disk
+cv2.imwrite(OUTPUT_PATH, enhanced_image_bgr )
+
+# %%'
+
 
