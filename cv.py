@@ -120,7 +120,11 @@ if __name__ == "__main__":
 import os
 import cv2
 
+# this was a screenshot from : ImageScope.
 image_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\test__zc_19_2__.png'
+image_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\zc09_2.jpg'
+image_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\zc09_3.jpg'
+image_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\zc68.jpg'
 # r'D:\PAS_kidney_pig\test\test__zc_19_2__.png'
 img = cv2.imread(image_path)
 
@@ -128,7 +132,7 @@ img = cv2.imread(image_path)
 # Crop 1024x1024 from top-left
 cropped = img[:1024, :1024]   # This is equivalent and cleaner
 
-output_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\test__zc_19_2__cropped.png'
+output_path = r'F:\OneDrive - Uniklinik RWTH Aachen\dl\segmentation\test_segment\zc68_cropped.png'
 #r"D:\PAS_kidney_pig\test\test__zc_19_2__cropped.png"
 cv2.imwrite(output_path, cropped)
     
